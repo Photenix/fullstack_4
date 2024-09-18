@@ -1,0 +1,1 @@
+const n=(e,s)=>{const t=document.getElementById(e),o=document.getElementById(s);t.type=t.type==="password"?"text":"password",o.innerHTML=t.type==="password"?'<i class="ti ti-eye-off" ></i>':'<i class="ti ti-eye" ></i>'},a=(e,s)=>{const t=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,20}$/,o=e.match(t),c=e==s;return o&&c};export{a as m,n as s};
