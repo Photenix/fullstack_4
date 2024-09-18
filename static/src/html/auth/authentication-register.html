@@ -17,7 +17,7 @@
       appearance: textfield; /* Fix for Firefox */
     }
   </style>
-  <script type="module" crossorigin src="/assets/register-BsENjWad.js"></script>
+  <script type="module" crossorigin src="/assets/register-C8h-SVrh.js"></script>
   <link rel="modulepreload" crossorigin href="/assets/main-D_gjJzFE.js">
   <link rel="modulepreload" crossorigin href="/assets/jmpTools-DpHYBAf9.js">
   <link rel="stylesheet" crossorigin href="/assets/main-BXKW3noi.css">
@@ -40,9 +40,22 @@
                 <p class="text-center">Compras rapidas</p>
                 <form id="form-register">
                   <div class="mb-3">
-                    <label for="name" class="form-label">Nombre</label>
-                    <input type="text" class="form-control" id="name" aria-describedby="textHelp" pattern="\w{2,30}">
-                    <p class="invalid-feedback"> Por favor escoja un nombre (no puede tener numeros) </p>
+                    <label for="username" class="form-label">Alias</label>
+                    <input type="text" class="form-control" id="username" aria-describedby="textHelp" pattern="\w{2,30}">
+                    <p class="invalid-feedback"> Por favor escoja un alias (no puede tener numeros) </p>
+                  </div>
+
+                  <div class="row g-2 align-items-center justify-content-between">
+                    <div class="mb-3 col">
+                      <label for="firstName" class="form-label">Nombres</label>
+                      <input type="text" class="form-control" id="firstName" aria-describedby="textHelp" pattern="\w{2,30}">
+                      <p class="invalid-feedback"> Por favor ingrese su nombre (no puede tener numeros) </p>
+                    </div>
+                    <div class="mb-3 col">
+                      <label for="lastName" class="form-label">Apellidos</label>
+                      <input type="text" class="form-control" id="lastName" aria-describedby="textHelp" pattern="\w{2,30}">
+                      <p class="invalid-feedback"> Por favor ingrese su apellido (no puede tener numeros) </p>
+                    </div>
                   </div>
                   
                   <div class="mb-3">
@@ -54,7 +67,7 @@
                         <li><a class="dropdown-item" value="DPI">DPI</a></li>
                         <li><a class="dropdown-item" value="Passport">Pasaporte</a></li>
                       </ul>
-                      <input type="number" class="form-control" aria-label="Text input with dropdown button" id="document">
+                      <input type="number" class="form-control" aria-label="Text input with dropdown button" id="documentNumber">
                     </div>
                   </div>
 
@@ -65,9 +78,21 @@
                   </div>
                   
                   <div class="mb-3">
+                    <label for="address" class="form-label">Direccion</label>
+                    <input type="text" class="form-control" id="address" aria-describedby="emailHelp">
+                    <p class="invalid-feedback"> Agrege una direccion </p>
+                  </div>
+                  
+                  <div class="mb-3">
                     <label for="phone" class="form-label">Telefono</label>
                     <input type="number" class="form-control" id="phone" aria-describedby="emailHelp" pattern="\d{10}">
                     <p class="invalid-feedback"> El telefono agregado no es valido </p>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="birthdate" class="form-label">Fecha de nacimiento</label>
+                    <input type="date" class="form-control" id="birthdate" aria-describedby="emailHelp">
+                    <p class="invalid-feedback"> La fecha no es valida </p>
                   </div>
 
                   <div class="mb-3">
@@ -75,7 +100,7 @@
                     <select class="form-select form-select-lg mb-3" aria-label="Large select example" id="rol">
                       <option selected>Cliente</option>
                       <option value="Admin">Administrador</option>
-                      <option value="Worker">Trabajador</option>
+                      <option value="Worker">Empleado</option>
                     </select>
                     <p class="invalid-feedback"> El correo esta en uso o no es valido </p>
                   </div>
