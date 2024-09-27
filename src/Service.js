@@ -11,7 +11,7 @@ class Service {
         this.app = express()
         this.settersApp()
         // this.viewEngine()
-        this.app.use(express.static(dir + "\\static"))
+        this.app.use(express.static( path.join( dir, "static" )))
         this.routes()
     }
 
