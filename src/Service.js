@@ -11,6 +11,8 @@ class Service {
         this.app = express()
         this.settersApp()
         // this.viewEngine()
+        console.log("Static direction");
+        console.log( path.join( dir, 'static' )) ;
         this.app.use(express.static( path.join( dir, "static" )))
         this.routes()
     }
