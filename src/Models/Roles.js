@@ -29,6 +29,8 @@ const permissionsSchema = new Schema({
 
     supplier: { type: privilegesSchema, required: true, description: 'The user has access to module supplier' },
 
+    category: { type: privilegesSchema, required: true, description: 'The user has access to module supplier' },
+
     product: { type: privilegesSchema, required: true, description: 'The user has access to module product' },
 
     client: { type: privilegesSchema, required: true, description: 'The user has access to module client' },
@@ -48,6 +50,7 @@ const rolesSchema = new Schema({
             access : defPrivileges,
             shopping : defPrivileges,
             supplier : defPrivileges,
+            category : defPrivileges,
             product : defPrivileges,
             client : defPrivileges,
             productOrder : defPrivileges,

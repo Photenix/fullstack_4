@@ -1,10 +1,9 @@
 <form action="/upClient/{{client._id}}" method="post">
-    <label for="name">Nombre:</label>
+    <label for="name">Nombre Completo:</label>
     <input type="text" id="name" name="name" required value="{{client.name}}">
     <label for="lastName">Apellido:</label>
     <input type="text" id="lastName" name="lastName" required value="{{client.lastName}}">
-    <label for="documentNumber">Cedula:</label>
-    <input type="text" id="documentNumber" name="documentNumber" required value="{{client.documentNumber}}">
+ 
     <label for="birthdate">Fecha de nacimiento:</label>
     <input type="date" id="birthdate" name="birthdate" required value="{{date}}">
     <label for="gender">Genero:</label>

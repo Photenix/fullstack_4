@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BoxNova</title>
+  <link rel="shortcut icon" type="image/png" href="/assets/favicon-CENdLQ5m.png" />
+  
+  <script type="module" crossorigin src="/assets/usuariosF-CziqK15l.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-C5KVrVRe.js">
+  <link rel="modulepreload" crossorigin href="/assets/sweetalert2.esm.all-BccGxJ0c.js">
+  <link rel="modulepreload" crossorigin href="/assets/jmpTools-DpHYBAf9.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CCNase7L.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-Cwme_53f.css">
+</head>
+
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    
+    <aside class="left-sidebar" id="navbar-admin-main"></aside>
+    
+    <div class="body-wrapper">
+      <!--  Header Start -->
+      <header class="app-header">
+        <nav class="navbar navbar-expand-lg navbar-light">
+          <ul class="navbar-nav">
+            <li class="nav-item d-block d-xl-none">
+              <a class="nav-link sidebartoggler nav-icon-hover" id="headerCollapse" href="javascript:void(0)">
+                <i class="ti ti-menu-2"></i>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link nav-icon-hover" href="javascript:void(0)">
+                <i class="ti ti-bell-ringing"></i>
+                <div class="notification bg-primary rounded-circle"></div>
+              </a>
+            </li>
+          </ul>
+          <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
+            <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
+              <a href="https://adminmart.com/product/modernize-free-bootstrap-admin-dashboard/" target="_blank" class="btn btn-primary">Download Free</a>
+              <li class="nav-item dropdown">
+                <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
+                  aria-expanded="false">
+                  <img src="/assets/user-1-CznVQ9Sv.jpg" alt="" width="35" height="35" class="rounded-circle">
+                </a>
+                <div class="dropdown-menu dropdown-menu-end dropdown-menu-animate-up" aria-labelledby="drop2">
+                  <div class="message-body">
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-user fs-6"></i>
+                      <p class="mb-0 fs-3">My Profile</p>
+                    </a>
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-mail fs-6"></i>
+                      <p class="mb-0 fs-3">My Account</p>
+                    </a>
+                    <a href="javascript:void(0)" class="d-flex align-items-center gap-2 dropdown-item">
+                      <i class="ti ti-list-check fs-6"></i>
+                      <p class="mb-0 fs-3">My Task</p>
+                    </a>
+                    <a href="./auth/authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </nav>
+      </header>
+      <!--  Header End -->
+      <div class="container-fluid">
+        <!--  Row 1 -->
+        <h1 id="title-form">Crear usuario</h1>
+        <br>
+        <div class="row">
+          <form id="form-user">
+            <div class="mb-3">
+              <label for="username" class="form-label">Alias</label>
+              <input type="text" class="form-control" id="username" aria-describedby="textHelp" pattern="\w{2,30}">
+              <p class="invalid-feedback"> Por favor escoja un alias (no puede tener numeros) </p>
+            </div>
+
+            <div class="row g-2 align-items-center justify-content-between">
+              <div class="mb-3 col">
+                <label for="firstName" class="form-label">Nombres</label>
+                <input type="text" class="form-control" id="firstName" aria-describedby="textHelp" pattern="[\w ]{2,30}">
+                <p class="invalid-feedback"> Por favor ingrese su nombre (no puede tener numeros) </p>
+              </div>
+              <div class="mb-3 col">
+                <label for="lastName" class="form-label">Apellidos</label>
+                <input type="text" class="form-control" id="lastName" aria-describedby="textHelp" pattern="[\w ]{2,30}">
+                <p class="invalid-feedback"> Por favor ingrese su apellido (no puede tener numeros) </p>
+              </div>
+            </div>
+            
+            <div class="mb-3">
+              <label for="document" class="form-label">Documento de identidad</label>
+              <div class="input-group">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false" id="document-identification">CC</button>
+                <ul class="dropdown-menu" id="dropdown-document">
+                  <li><a class="dropdown-item" value="CC">CC</a></li>
+                  <li><a class="dropdown-item" value="DPI">DPI</a></li>
+                  <li><a class="dropdown-item" value="Passport">Pasaporte</a></li>
+                </ul>
+                <input type="number" class="form-control" aria-label="Text input with dropdown button" id="documentNumber">
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="email" class="form-label">Correo</label>
+              <input type="email" class="form-control" id="email" aria-describedby="emailHelp">
+              <p class="invalid-feedback"> El correo esta en uso o no es valido </p>
+            </div>
+            
+            <div class="mb-3">
+              <label for="address" class="form-label">Direccion</label>
+              <input type="text" class="form-control" id="address" aria-describedby="emailHelp">
+              <p class="invalid-feedback"> Agrege una direccion </p>
+            </div>
+            
+            <div class="mb-3">
+              <label for="phone" class="form-label">Telefono</label>
+              <input type="number" class="form-control" id="phone" aria-describedby="emailHelp" pattern="\d{10}">
+              <p class="invalid-feedback"> El telefono agregado no es valido </p>
+            </div>
+
+            <div class="mb-3">
+              <label for="birthdate" class="form-label">Fecha de nacimiento</label>
+              <input type="date" class="form-control" id="birthdate" aria-describedby="emailHelp">
+              <p class="invalid-feedback"> La fecha no es valida </p>
+            </div>
+
+            <div class="mb-3">
+              <label for="rol" class="form-label">Tipo de rol</label>
+              <select class="form-select form-select-lg mb-3" aria-label="Large select example" id="rol">
+                <option selected>Cliente</option>
+                <option value="Admin">Administrador</option>
+                <option value="Worker">Empleado</option>
+              </select>
+              <p class="invalid-feedback"> El correo esta en uso o no es valido </p>
+            </div>
+
+            <div class="row g-2 align-items-center justify-content-between">
+              <div class="mb-3 col">
+                <label for="password-a" class="form-label">Contraseña</label>
+                <div class="input-group mb-2">
+                  <input type="password" class="form-control" id="password-a">
+                  <span class="input-group-text" id="shw-a"><i class="ti ti-eye-off"></i></span>
+                </div>
+                <p class="invalid-feedback">Contraseña no valida</p>
+              </div>
+              <div class="mb-3 col">
+                <label for="password-b" class="form-label">Repetir contraseña</label>
+                <div class="input-group mb-2">
+                  <input type="password" class="form-control" id="password-b">
+                  <span class="input-group-text" id="shw-b"><i class="ti ti-eye-off" ></i></span>
+                </div>
+                <p class="invalid-feedback">Contraseña no coincide</p>
+              </div>
+            </div>
+
+            <div id="passwordHelpBlock" class="form-text text-center">
+              La contraseña tiene que tener entre 8 y 20 caracteres entre ellos tiene que tener minimo una mayuscula una minuscula y un numero
+            </div>
+            <br>
+            <button type="submit" class="btn btn-primary w-100 py-8 fs-4 mb-4 rounded-2">Crear</button>
+            <a href="/src/html/usuarios.html" class="btn btn-light w-100 py-8 fs-4 mb-4 rounded-2">Cancelar</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

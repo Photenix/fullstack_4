@@ -1,5 +1,5 @@
 import Users from '../Models/Users';
-import { getRolAll, getRolName } from '../Tools/rol.tool'
+import { getRolAll, getRolID, getRolName } from '../Tools/rol.tool'
 
 const getUsers = async (req, res) => {
     const roles = await getRolAll()
@@ -14,20 +14,46 @@ const getUsers = async (req, res) => {
     return res.json(users);
 }
 
+const findUser = async (req, res) => {
+    const info = req.body 
+
+    for (const inf of Object.keys(info)) {
+        info[ inf ] = { $regex: `${info[inf]}.*`, $options: 'i' }
+    }
+    
+    const users = await Users.find( info ).lean();
+    if( users.length === 0 ) return res.status(404).json({ message: 'No se encontraron usuarios con ese nombre' });
+    const roles = await getRolAll()
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i]
+        user.password = "*****"; // Evitar que se muestre la contraseña en la respuesta JSON
+        let rol = roles.find( e => user.rol.equals(e._id) )
+        user.rol = rol.name
+    }
+    return res.json(users);
+}
+
 const getUserById = async (req, res) => {    
-    const user = await Users.findById(req.params.id).lean()
-    if(!user) return res.status(404).json({ message: 'No se encontró el usuario' });
-    const rol = await getRolName( user.rol )
-    user.password = "*****";
-    user.rol = rol
-    return res.json(user);
+    try {
+        const user = await Users.findById(req.params.id).lean()
+        if(!user) return res.status(404).json({ message: 'No se encontró el usuario' });
+        const rol = await getRolName( user.rol )
+        user.password = "*****";
+        user.rol = rol
+        return res.json(user);
+    } catch (error) {
+        return res.status(404).json({ message: 'Error: ' + error })
+    }
 }
 
 const createUser = async (req, res) => {
     try{
+        const idRol = await getRolID( req.body.rol )
+        req.body.rol = idRol
         const user = new Users( req.body );
-        await user.save();
-        return res.json({ message: 'Usuario creado exitosamente' });
+        res.json( user )
+        // await user.save();
+        // return res.json({ message: 'Usuario creado exitosamente', success: true });
     }
     catch(e){
         res.status(404).json({message:'Error al crear el usuario', error: e.message});
@@ -37,8 +63,10 @@ const createUser = async (req, res) => {
 const updateUser = async ( req, res ) => {
     const { id, changes } = req.body;
     try{
+        const idRol = await getRolID( changes.rol )
+        changes.rol = idRol
         const user = await Users.findByIdAndUpdate(id, changes)
-        res.status(200).json({ message: 'Usuario editado', info: user })
+        res.status(200).json({ message: 'Usuario editado', info: user, success: true })
     }
     catch(e){
         res.status(404).json({message:'Error al actualizar el usuario', error: e.message});
@@ -48,17 +76,16 @@ const updateUser = async ( req, res ) => {
 const deleteUser = async (req, res) => {
     try{
         const { id } = req.body;
-
         const user = await Users.findByIdAndDelete(id)
         
         if(!user) return res.status(404).json({ message: 'No se encontró el usuario' });
-        res.status(200).json({message: "Usuario eliminado"})
+        res.status(200).json({message: "Usuario eliminado", success: true})
     }
     catch(e){
-        res.status(404).json({message:'Error al eliminar el usuario', error: e.message});
+        res.status(404).json({message:'Error al eliminar el usuario', error: e.message, success: false});
     }
 }
 
 
 
-export { getUsers, getUserById, createUser, updateUser, deleteUser } 
+export { getUsers, findUser, getUserById, createUser, updateUser, deleteUser } 

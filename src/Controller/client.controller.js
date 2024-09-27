@@ -1,53 +1,69 @@
-import Client from "../Models/Clients.js";
+import Cliente from '../Models/cliente.js';
 
-const clientFindAll = async (req, res) => {
-    const client = await Client.find()
-    res.json(client)
-    // res.render('clients', {client})
-}
-
-const clientFindById = async (req, res) => {
-    const client = await Client.findById(req.params.id)
-    // res.send(client)
-    if( client !== undefined || client != null ) {
-        return res.json(client)
-    }
-    res.status(404).json({message: 'Not Found'})
-}
-
-const clientCreate = async (req, res) => {    
-    try{
-        const client = new Client(req.body)
-        await client.save()
-        res.send('Cliente creado con exito')
-    }
-    catch(e){
-        res.send('Error cliente no creado')
+export const clientFindAll = async (req, res) => {
+    try {
+        const clients = await Cliente.find();
+        res.json(clients);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener los clientes', error });
     }
 }
 
-const clientViewUpdate = async (req, res) => {
-    const client = await Client.findById(req.params.id)
-    let date = client.birthdate.toISOString().split('T')[0];
-    date = date.split('T')[0]
-    
-    res.render('update', { client, date })
-}
-
-const clientUpdate = async (req, res) => {
-    try{
-        const client = await Client.findByIdAndUpdate(req.params.id, req.body, { new: true })
-        res.redirect('/client');
-    }
-    catch(e){
-        res.send('Error al actualizar el cliente')
+export const clientFindById = async (req, res) => {
+    try {
+        const client = await Cliente.findById(req.params.id);
+        if (!client) {
+            return res.status(404).json({message: 'Cliente no encontrado'});
+        }
+        res.json(client);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el cliente', error });
     }
 }
 
-const clientDelete = async (req, res) => {
-    await Client.findByIdAndDelete(req.params.id)
-    res.send("Cliente eliminado correctamente")
+export const clientCreate = async (req, res) => {    
+    try {
+        const client = new Cliente(req.body);
+        await client.save();
+        res.status(201).json({ message: 'Cliente creado con éxito', client });
+    } catch (error) {
+        res.status(400).json({ message: 'Error al crear el cliente', error });
+    }
 }
 
+export const clientViewUpdate = async (req, res) => {
+    try {
+        const client = await Cliente.findById(req.params.id);
+        if (!client) {
+            return res.status(404).json({message: 'Cliente no encontrado'});
+        }
+        let date = client.birthdate.toISOString().split('T')[0];
+        res.render('update', { client, date });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el cliente para actualizar', error });
+    }
+}
 
-export { clientFindAll, clientFindById, clientCreate, clientUpdate, clientDelete, clientViewUpdate } 
+export const clientUpdate = async (req, res) => {
+    try {
+        const client = await Cliente.findByIdAndUpdate(req.params.id, req.body, { new: true });
+        if (!client) {
+            return res.status(404).json({message: 'Cliente no encontrado'});
+        }
+        res.status(200).json({ message: 'Cliente actualizado correctamente', client });
+    } catch (error) {
+        res.status(400).json({ message: 'Error al actualizar el cliente', error });
+    }
+}
+
+export const clientDelete = async (req, res) => {
+    try {
+        const clienteEliminado = await Cliente.findByIdAndDelete(req.params.id);
+        if (!clienteEliminado) {
+            return res.status(404).json({ message: 'Cliente no encontrado' });
+        }
+        res.status(200).json({ message: 'Cliente eliminado correctamente' });
+    } catch (error) {
+        res.status(500).json({ message: 'Error al eliminar el cliente', error });
+    }
+};

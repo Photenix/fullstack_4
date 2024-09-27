@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BoxNova</title>
+  <link rel="shortcut icon" type="image/png" href="../assets/images/logos/favicon.png" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+
+  <script type="module" crossorigin src="/assets/compra-DjlbRBTE.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
+  <link rel="modulepreload" crossorigin href="/assets/main-C5KVrVRe.js">
+  <link rel="modulepreload" crossorigin href="/assets/jquery-DCYNSGH8.js">
+  <link rel="modulepreload" crossorigin href="/assets/app.min-Bwb1wE4q.js">
+  <link rel="stylesheet" crossorigin href="/assets/main-CCNase7L.css">
+  <link rel="stylesheet" crossorigin href="/assets/styles-Cwme_53f.css">
+  <link rel="stylesheet" crossorigin href="/assets/compra-BVcd4WTt.css">
+</head>
+
+<body>
+  <!--  Body Wrapper -->
+  <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
+    data-sidebar-position="fixed" data-header-position="fixed">
+    <!-- Sidebar Start parte izquierda de la pagina -->
+    <aside class="left-sidebar" id="navbar-admin-main"></aside>
+    <!--  Sidebar End -->
+
+   
+    <div class="main-container">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+          <h1>Compras</h1>
+          <button class="btn btn-primary" id="addPurchaseBtn">
+              <i class="bi bi-plus-circle"></i> Agregar
+          </button>
+      </div>
+      <div class="input-group mb-3">
+          <span class="input-group-text"><i class="bi bi-search"></i></span>
+          <input type="text" class="form-control" id="searchInput" placeholder="Buscar compras...">
+      </div>
+      <div id="purchasesList" class="accordion">
+          <!-- Purchases will be dynamically added here -->
+      </div>
+  </div>
+
+  <!-- Add/Edit Purchase Modal -->
+  <div class="modal fade" id="purchaseModal" tabindex="-1">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="purchaseModalLabel">Agregar Compra</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                  <form id="purchaseForm">
+                      <div class="mb-3">
+                          <label for="purchaseId" class="form-label">ID de Compra</label>
+                          <input type="text" class="form-control" id="purchaseId" required>
+                      </div>
+                      <div class="mb-3">
+                          <label for="provider" class="form-label">Proveedor</label>
+                          <input type="text" class="form-control" id="provider" required>
+                      </div>
+                      <div class="mb-3">
+                          <label for="totalValue" class="form-label">Valor Total</label>
+                          <input type="number" class="form-control" id="totalValue" required>
+                      </div>
+                      <div class="mb-3">
+                          <label for="purchaseDate" class="form-label">Fecha</label>
+                          <input type="date" class="form-control" id="purchaseDate" required>
+                      </div>
+                  </form>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary" id="savePurchaseBtn">Guardar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Add/Edit Sub-purchase Modal -->
+  <div class="modal fade" id="subPurchaseModal" tabindex="-1">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="subPurchaseModalLabel">Agregar Sub-compra</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                  <form id="subPurchaseForm">
+                      <div class="mb-3">
+                          <label for="subPurchaseName" class="form-label">Nombre</label>
+                          <input type="text" class="form-control" id="subPurchaseName" required>
+                      </div>
+                      <div class="mb-3">
+                          <label for="quantity" class="form-label">Cantidad</label>
+                          <input type="number" class="form-control" id="quantity" required>
+                      </div>
+                      <div class="mb-3">
+                          <label for="unitValue" class="form-label">Valor Unitario</label>
+                          <input type="number" class="form-control" id="unitValue" required>
+                      </div>
+                      <div class="mb-3">
+                          <label for="type" class="form-label">Tipo</label>
+                          <input type="text" class="form-control" id="type" required>
+                      </div>
+                  </form>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                  <button type="button" class="btn btn-primary" id="saveSubPurchaseBtn">Guardar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- Confirmation Modal -->
+  <div class="modal fade" id="confirmModal" tabindex="-1">
+      <div class="modal-dialog">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title" id="confirmModalLabel">Confirmar Acción</h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              </div>
+              <div class="modal-body">
+                  <p id="confirmMessage"></p>
+              </div>
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                  <button type="button" class="btn btn-danger" id="confirmActionBtn">Confirmar</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+
+   
+  </div>
+
+  
+  
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  
+  <script src="../js/agregar-compra.js"></script>
+
+
+
+</body>
+
+</html>
