@@ -4,6 +4,7 @@ const cookieParser = require('cookie-parser');
 const { engine } = require('express-handlebars')
 const mainRoutes = require('./Router/index.routes')
 const authRoutes = require('./Router/auth.routes')
+var path = require('path');
 
 class Service {
     constructor( dir ) {
