@@ -1,7 +1,7 @@
 const { Router } = require('express');
 import { getProfile } from "../Controller/access.controller.js";
 import { createProduct, deleteDetailProduct, deleteProduct, getProductById, getProducts, updateProduct } from "../Controller/produt.controller.js";
-import { updateRol, getPermissions, getRoles, updatePermissions } from "../Controller/rol.controller.js";
+import { updateRol, getPermissions, getRoles, updatePermissions, createRol, deleteRol } from "../Controller/rol.controller.js";
 import { createUser, deleteUser, findUser, getUserById, getUsers, updateUser } from "../Controller/user.controller.js";
 import { createCategoria, deleteCategoria, getCategoriaById, getCategorias, updateCategoria } from "../Controller/categoria.controller.js";
 
@@ -30,8 +30,10 @@ auth.get('/profile', getProfile )
 // ROL
 auth.get('/rol', getRoles)
 auth.get('/rol/:name', getPermissions)
+auth.post('/rol', createRol)
 auth.put('/rol', checkPermissions, updatePermissions)
-auth.put('/rol/status', updateRol )
+auth.put('/rol/status', updateRol)
+auth.delete('/rol/:id', deleteRol)
 
 // PRODUCT
 auth.get('/product', getProducts )

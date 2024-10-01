@@ -1,0 +1,1 @@
+.user-display{display:grid;grid-template-columns:repeat(2,calc(50% - 8px));grid-template-rows:repeat(5,1fr);gap:4px 20px;grid-template-areas:". img" ". img" ". img" ". ." ". .";padding:0 8px}.user-display p{overflow-wrap:break-word;text-wrap:wrap;white-space:normal}.user-display>img{grid-area:img}

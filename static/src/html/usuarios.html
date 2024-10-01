@@ -6,21 +6,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BoxNova</title>
   <link rel="shortcut icon" type="image/png" href="/assets/favicon-CENdLQ5m.png" />
-  <script type="module" crossorigin src="/assets/user-CD91I5xf.js"></script>
-  <link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-  <link rel="modulepreload" crossorigin href="/assets/main-C5KVrVRe.js">
+  <script type="module" crossorigin src="/assets/user-PYn_y-0q.js"></script>
+  <link rel="modulepreload" crossorigin href="/assets/main-DtEDl7Xs.js">
   <link rel="modulepreload" crossorigin href="/assets/sweetalert2.esm.all-BccGxJ0c.js">
   <link rel="stylesheet" crossorigin href="/assets/main-CCNase7L.css">
   <link rel="stylesheet" crossorigin href="/assets/styles-Cwme_53f.css">
+  <link rel="stylesheet" crossorigin href="/assets/user-DM8zM1rA.css">
 </head>
 
 <body>
   <!--  Body Wrapper -->
   <div class="page-wrapper" id="main-wrapper" data-layout="vertical" data-navbarbg="skin6" data-sidebartype="full"
     data-sidebar-position="fixed" data-header-position="fixed">
-    
+
     <aside class="left-sidebar" id="navbar-admin-main"></aside>
-    
+
     <div class="body-wrapper">
       <!--  Header Start -->
       <header class="app-header">
@@ -40,7 +40,8 @@
           </ul>
           <div class="navbar-collapse justify-content-end px-0" id="navbarNav">
             <ul class="navbar-nav flex-row ms-auto align-items-center justify-content-end">
-              <a href="https://adminmart.com/product/modernize-free-bootstrap-admin-dashboard/" target="_blank" class="btn btn-primary">Download Free</a>
+              <a href="https://adminmart.com/product/modernize-free-bootstrap-admin-dashboard/" target="_blank"
+                class="btn btn-primary">Download Free</a>
               <li class="nav-item dropdown">
                 <a class="nav-link nav-icon-hover" href="javascript:void(0)" id="drop2" data-bs-toggle="dropdown"
                   aria-expanded="false">
@@ -60,7 +61,8 @@
                       <i class="ti ti-list-check fs-6"></i>
                       <p class="mb-0 fs-3">My Task</p>
                     </a>
-                    <a href="./auth/authentication-login.html" class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
+                    <a href="./auth/authentication-login.html"
+                      class="btn btn-outline-primary mx-3 mt-2 d-block">Logout</a>
                   </div>
                 </div>
               </li>
@@ -73,29 +75,29 @@
         <!--  Row 1 -->
         <h1 class="text-center mb-4">Usuario</h1>
         <div class="row">
-            <div class="d-flex col gap-1">
-              <div class="col-sm-3">
-                <label class="visually-hidden" for="filter-user">Preference</label>
-                <select class="form-select" id="filter-user">
-                  <option selected value="email">Correo</option>
-                  <option value="username">Nombre</option>
-                  <option value="phone">Telefono</option>
-                  <option value="_id">ID</option>
-                </select>
-              </div>
-              <input type="text" id="search-user" placeholder="Buscar..." class="form-control">
+          <div class="d-flex col gap-1">
+            <div class="col-sm-3">
+              <label class="visually-hidden" for="filter-user">Preference</label>
+              <select class="form-select" id="filter-user">
+                <option selected value="email">Correo</option>
+                <option value="username">Nombre</option>
+                <option value="phone">Telefono</option>
+                <option value="_id">ID</option>
+              </select>
             </div>
+            <input type="text" id="search-user" placeholder="Buscar..." class="form-control">
+          </div>
 
-            <div class="d-flex col gap-2">
-              <a href="./usuario-form.html" class="btn btn-primary col"><i class="ti ti-circle-plus"></i> Agregar</a>
-            </div>
+          <div class="d-flex col gap-2">
+            <a href="./usuario-form.html" class="btn btn-primary col"><i class="ti ti-circle-plus"></i> Agregar</a>
+          </div>
         </div>
         <br>
         <div class="row">
           <table class="table">
             <thead>
               <tr>
-                <th scope="col">id</th>
+                <th scope="col">Documento</th>
                 <th scope="col">Nombre</th>
                 <th scope="col">Correo</th>
                 <th scope="col">Numero de contacto</th>
@@ -125,6 +127,68 @@
             </li>
           </ul>
         </nav>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="modal-user" tabindex="-1" aria-labelledby="Informacion detallada usuario" aria-hidden="true">
+    role="dialog" style="display: block;">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="detail-title">Detalle del usuario ...</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="user-display">
+            <img src="/assets/user-1-CznVQ9Sv.jpg" class="img-fluid rounded-circle" alt="...">
+            <div>
+              <h6 class="pb-2 text-info border-bottom border-info">
+                Nombre completo
+              </h6>
+              <p id="user-name">Juan el berraco</p>
+            </div>
+            <div>
+              <h6 class="pb-2 text-info border-bottom border-info">
+                Numero de documento
+              </h6>
+              <p id="user-id">C.C. 11526516516</p>
+            </div>
+            <div>
+              <h6 class="pb-2 text-info border-bottom border-info">
+                Correo
+              </h6>
+              <p id="user-email">juanmanuel@gmail.com</p>
+            </div>
+            <div>
+              <h6 class="pb-2 text-info border-bottom border-info">
+                Telefono celular
+              </h6>
+              <p id="user-phone">23515315156</p>
+            </div>
+            <div>
+              <h6 class="pb-2 text-info border-bottom border-info">
+                Cumpleaños
+              </h6>
+              <p id="user-birthday">17/10/1999</p>
+            </div>
+            <div>
+              <h6 class="pb-2 text-info border-bottom border-info">
+                Alias
+              </h6>
+              <p id="user-nickname">Juanito</p>
+            </div>
+            <div>
+              <h6 class="pb-2 text-info border-bottom border-info">
+                Dirección
+              </h6>
+              <p id="user-address">Calle 70</p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Cerrar</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>

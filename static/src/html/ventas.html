@@ -9,9 +9,8 @@
 
 
 
-<script type="module" crossorigin src="/assets/ventas-Z7WJYuyJ.js"></script>
-<link rel="modulepreload" crossorigin href="/assets/modulepreload-polyfill-B5Qt9EMX.js">
-<link rel="modulepreload" crossorigin href="/assets/main-C5KVrVRe.js">
+<script type="module" crossorigin src="/assets/ventas-cLkDKkZ-.js"></script>
+<link rel="modulepreload" crossorigin href="/assets/main-DtEDl7Xs.js">
 <link rel="stylesheet" crossorigin href="/assets/main-CCNase7L.css">
 <link rel="stylesheet" crossorigin href="/assets/styles-Cwme_53f.css">
 <link rel="stylesheet" crossorigin href="/assets/ventas-B4pZ-xVf.css">
@@ -80,8 +79,8 @@
                 <input type="text" id="searchInput" placeholder="Buscar por ID de venta, cliente, fecha o total...">
                 <button id="searchButton"><i class="fas fa-search"></i></button>
             </div>
-            <button id="agregarVenta" class="btn-primary">Nueva Venta</button>
-            <button id="devoluciones" class="btn-secondary">Devoluciones</button>
+            <button id="agregarVenta" class="btn btn-outline-primary">Nueva Venta</button>
+            <button id="devoluciones" class="btn btn-outline-danger">Devoluciones</button>
         </header>
         <div class="table-container">
             <table id="tablaVentas">
@@ -124,7 +123,7 @@
         <div id="reciboPago" class="mt-4">
             <h3>Recibo de Pago</h3>
             <input type="file" id="reciboInput" accept="image/*,application/pdf">
-            <button id="subirRecibo" class="btn-primary mt-2">Subir Recibo</button>
+            <button id="subirRecibo" class="btn btn-outline-success">Subir Recibo</button>
             <div id="reciboPreview" class="mt-2"></div>
         </div>
     </div>
@@ -163,7 +162,7 @@
                 <label for="cantidad">Cantidad:</label>
                 <input type="number" id="cantidad" min="1" value="1" required>
             </div>
-            <button type="button" id="agregarProducto" class="btn-secondary">Agregar Producto</button>
+            <button type="button" id="agregarProducto" class="btn btn-outline-success">Agregar Producto</button>
             <table id="tablaProductosVenta">
                 <thead>
                     <tr>
@@ -182,7 +181,7 @@
                 <label for="total">Total (COP):</label>
                 <input type="text" id="total" readonly>
             </div>
-            <button type="submit" class="btn-primary">Guardar Venta</button>
+            <button type="submit" class="btn btn-outline-primary">Guardar Venta</button>
         </form>
     </div>
 </div>
@@ -213,7 +212,7 @@
               <input type="file" id="reciboDevolucion" accept="image/*,application/pdf" required>
           </div>
           <div id="reciboDevolucionPreview" class="mt-2"></div>
-          <button type="submit" class="btn-primary">Procesar Devolución</button>
+          <button type="submit" class="btn btn-outline-success">Procesar Devolución</button>
       </form>
   </div>
 </div>

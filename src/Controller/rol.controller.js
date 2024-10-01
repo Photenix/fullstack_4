@@ -9,11 +9,24 @@ const getPermissions = async ( req, res ) => {
     const { name } = req.params
     try{
         // const permissions = await Roles.findOne({name}).populate('permissions');
-        const permissions = await Roles.findOne({name},"permissions");
+        const permissions = await Roles.findOne({name: new RegExp(name,'i')},"permissions");
         return res.status(200).json(permissions);
     }
     catch(e){
         return res.status(404).json({message: 'Error al obtener los permisos', error: e.message});
+    }
+}
+
+const createRol = async ( req, res ) => {
+    const { name, permissions } = req.body
+    try{
+        if( !name || !permissions ) return res.status(400).json({message:"NO se pudo crear rol"})
+        const role = new Roles({ name, permissions });
+        await role.save();
+        return res.status(200).json({ message: 'Rol creado correctamente', data: role, success: true });
+    }
+    catch(e){
+        return res.status(404).json({ message: 'Error al crear el rol', error: e.message, success: false });
     }
 }
 
@@ -42,4 +55,18 @@ const updateRol = async (req, res) => {
     }
 }
 
-export { getRoles, getPermissions, updatePermissions, updateRol }
+const deleteRol = async (req, res) => {
+    const { id } = req.params
+    try{
+        const frole = await Roles.findById( id ).lean()
+        if( frole.name === "Admin" || frole.name === "Worker" ) return res.status(400).json({message:'No se puede eliminar este rol', success: false })
+        const role = await Roles.findByIdAndDelete(id);
+        if(!role) return res.status(404).json({message:'Rol no encontrado', success: false })
+        return res.status(200).json({ message: 'Rol eliminado correctamente', success: true });
+    }
+    catch(e){
+        return res.status(404).json({message: 'Error al eliminar el rol', error: e.message, success: false});
+    }
+}
+
+export { getRoles, getPermissions, createRol, updatePermissions, updateRol, deleteRol }

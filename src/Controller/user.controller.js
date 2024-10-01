@@ -51,20 +51,21 @@ const createUser = async (req, res) => {
         const idRol = await getRolID( req.body.rol )
         req.body.rol = idRol
         const user = new Users( req.body );
-        res.json( user )
-        // await user.save();
-        // return res.json({ message: 'Usuario creado exitosamente', success: true });
+        await user.save();
+        return res.json({ message: 'Usuario creado exitosamente', success: true });
     }
     catch(e){
-        res.status(404).json({message:'Error al crear el usuario', error: e.message});
+        res.status(404).json({message:'Error al crear el usuario', error: e.message, success: false});
     }
 }
 
 const updateUser = async ( req, res ) => {
     const { id, changes } = req.body;
     try{
-        const idRol = await getRolID( changes.rol )
-        changes.rol = idRol
+        if( changes.rol !== undefined ){
+            const idRol = await getRolID( changes.rol )
+            changes.rol = idRol
+        }
         const user = await Users.findByIdAndUpdate(id, changes)
         res.status(200).json({ message: 'Usuario editado', info: user, success: true })
     }

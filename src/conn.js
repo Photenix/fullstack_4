@@ -1,9 +1,7 @@
 import { connect } from "mongoose";
 
 const URL = (process.env.MONGO + process.env.DB) || ('mongodb://localhost:27017/'+'BoxNovaSoft')
-
-console.log( URL );
-
+console.log (URL)
 const connectDB = async () => {
     try {
         await connect(URL);

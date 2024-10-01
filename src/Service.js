@@ -4,7 +4,6 @@ const cookieParser = require('cookie-parser');
 const { engine } = require('express-handlebars')
 const mainRoutes = require('./Router/index.routes')
 const authRoutes = require('./Router/auth.routes')
-var path = require('path');
 
 class Service {
     constructor( dir ) {
@@ -12,9 +11,7 @@ class Service {
         this.app = express()
         this.settersApp()
         // this.viewEngine()
-        console.log("Static direction");
-        console.log( path.join( dir, 'static' )) ;
-        this.app.use(express.static( path.join( dir, "static" )))
+        this.app.use(express.static(dir + "\\static"))
         this.routes()
     }
 
@@ -41,7 +38,7 @@ class Service {
         // config cors, cookies and API key
         console.log( "Iniciando use");
         this.app.use( cors({
-            origin: 'http://localhost:5173',
+            origin: ['http://localhost:5173', '*', '0.0.0.0'],
             credentials: true
         }) )
         // this.app.use( cors() )

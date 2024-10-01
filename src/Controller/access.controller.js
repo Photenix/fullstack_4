@@ -27,7 +27,6 @@ const getToken = async (req, res) => {
     res.cookie('token', token,{
         httpOnly : true,
         secure : false,
-        sameSite: 'None',
         maxAge : 1000 * 60 * 60 * 24 * 6.5
         // 1000 ms 60 seconds 60 minutes and 24 hours and 6.5 days
     })

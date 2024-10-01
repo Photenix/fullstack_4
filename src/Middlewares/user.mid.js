@@ -4,7 +4,7 @@ import validateInformationField from "../Tools/creation.tool"
 const INFO_USER = [
   "typeIdentifier", "documentNumber", "username",
   "password", "email", "firstName", "lastName",
-  "phone", "birthdate", "address", "rol"
+  "phone", "birthdate", "address", "rol", "state"
 ]
 
 const INFO_CLIENT = [

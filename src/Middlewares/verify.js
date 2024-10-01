@@ -34,18 +34,23 @@ const hasPermission = async (req, res, next) => {
         default: break;
     }
 
-    let instance = req.originalUrl
-    instance = instance.slice("/api/auth/".length)
-    instance = instance.split("/")[0]
-
-    if( instance === "profile" ) return next()
-
-    const rol = await getRolAllInfo( req.user.rol )    
-    const { permissions } = rol
-
-    if( permissions[instance][method] ) return next()
+    try{
+        let instance = req.originalUrl
+        instance = instance.slice("/api/auth/".length)
+        instance = instance.split("/")[0]
     
-    return res.status(403).json({ message: 'No tienes permisos para realizar esta acción' });
+        if( instance === "profile" ) return next()
+    
+        const rol = await getRolAllInfo( req.user.rol )    
+        const { permissions } = rol
+    
+        if( permissions[instance][method] ) return next()
+        
+        return res.status(403).json({ message: 'No tienes permisos para realizar esta acción' });
+    }
+    catch( err ){
+        return res.status(400).json({ message: 'Error al validar permisos', error: err });
+    }
 }
 
 
