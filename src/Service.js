@@ -1,10 +1,11 @@
 const express = require('express')
 const cors = require('cors')
 const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+
 const { engine } = require('express-handlebars')
 const mainRoutes = require('./Router/index.routes')
 const authRoutes = require('./Router/auth.routes')
-const path = require('path');
 
 class Service {
     constructor( dir ) {
@@ -12,7 +13,7 @@ class Service {
         this.app = express()
         this.settersApp()
         // this.viewEngine()
-        this.app.use(express.static( path.join( dir, "static" )))
+        this.app.use(express.static(dir + "\\static"))
         this.routes()
     }
 
@@ -44,6 +45,8 @@ class Service {
         }) )
         // this.app.use( cors() )
         this.app.use( cookieParser() )
+        this.app.use( bodyParser.json({limit: '5mb'}) )
+        this.app.use(bodyParser.urlencoded({ limit: '5mb', extended: true }));
         this.app.use( express.json() )
         this.app.use( express.urlencoded({ extended: true }) )
         this.app.set('key', process.env.API)

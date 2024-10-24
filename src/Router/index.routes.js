@@ -2,8 +2,9 @@ import { Router } from "express";
 import { confirmToken, deleteAcount, getPIN, getToken, newPassword } from "../Controller/access.controller.js";
 import { checkUserPA, makeClient } from "../Middlewares/user.mid.js";
 import { createUser, getUsers } from "../Controller/user.controller.js";
-import { clientCreate, clientDelete, clientFindAll, clientFindById, clientUpdate, clientViewUpdate } from "../Controller/client.controller.js";
+import { clientCreate, clientDelete, clientFindAll, clientFindById, clientUpdate } from "../Controller/client.controller.js";
 import { crearVenta, obtenerVentas } from "../Controller/ventaController.js";
+import { getCategorias, getCategoriaById, createCategoria, updateCategoria, deleteCategoria, addSubcategoria, updateSubcategoria, deleteSubcategoria } from "../Controller/categoria.controller.js";
 import { crearDetallePedido, eliminarDetallePedido, obtenerDetallesPedido } from "../Controller/detallePedidoController.js";
 import { actualizarDetalleVenta, crearDetalleVenta, eliminarDetalleVenta, obtenerDetallesVenta, obtenerDetalleVentaPorId } from "../Controller/detalleVentaController.js";
 import { actualizarPedido, crearPedido, eliminarPedido, obtenerPedidos } from "../Controller/pedidoController.js";
@@ -15,10 +16,9 @@ const router = Router()
 // CLIENT
 router.get('/client', clientFindAll);
 router.get('/client/:id', clientFindById);
-router.post('/addClient', clientCreate);
-router.get('/upClient/:id', clientViewUpdate);
-router.post('/upClient/:id', clientUpdate);
-router.post('/deleteClient/:id', clientDelete);
+router.post('/client', clientCreate);
+router.put('/client/:id', clientUpdate);
+router.delete('/client/:id', clientDelete);
 
 //ACCESS
 router.post('/login', getToken )
@@ -68,6 +68,18 @@ router.post('/devolucion', crearDevolucion);
 router.get('/devolucion', obtenerDevoluciones);
 router.put('/devolucion', actualizarDevolucion);
 router.delete('/devolucion', eliminarDevolucion);
+
+//Categoria 
+router.get('/categorias', getCategorias);
+router.get('/categorias/:id', getCategoriaById);
+router.post('/categorias', createCategoria);
+router.put('/categorias/:id', updateCategoria);
+router.delete('/categorias/:id', deleteCategoria);
+
+//Subcategoria 
+router.post('/categorias/:id/subcategorias', addSubcategoria); // Añadir subcategoría
+router.put('/categorias/:id/subcategorias/:subId', updateSubcategoria);
+router.delete('/categorias/:id/subcategorias/:subId', deleteSubcategoria); // Eliminar subcategoría
 
 
 

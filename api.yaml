@@ -1,0 +1,182 @@
+openapi: 3.0.3
+info:
+  version: "3.0.3"
+  title: Proyecto box nova software
+servers:
+  - url: https://petstore3.swagger.io/api/v3
+tags:
+  - name: access
+  - name: rol/roles
+  - name: users
+  - name: store
+  - name: purchase/ventas
+  - name: pedidos
+  - name: category/categoria
+  - name: producto
+  - name: devolucíones
+  - name: reportes
+  - name: supplier/proveedores
+paths:
+  /api/login:
+    post:
+      tags:
+        - access
+      summary: Obtiene un token de acceso
+      responses:
+        "200":
+          description: Usuario logeado
+  /api/register:
+    post:
+      tags:
+        - access
+      summary: Create a new users account of client
+      responses:
+        "200":
+          description: Usuario registrado
+  /api/pin:
+    post: 
+      tags: 
+        - access
+      summary: Encuentra un pin
+      responses:
+        "200":
+          description: Pin encontrado
+        "404":
+          description: Pin no encontrado
+  /api/new-password/{id}:
+    post:
+      tags:
+        - access
+      responses:
+        "200":
+          description: nueva contraseña
+  /api/user/confirm:
+    get:
+      tags:
+        - access
+      summary: Confirm token
+  /api/auth/profile/:
+    get:
+      tags:
+        - access
+  /api/auth/rol:
+    get:
+      tags:
+        - rol/roles
+      summary: Obtiene los roles
+    post:
+      tags:
+        - rol/roles
+    put:
+      tags:
+        - rol/roles
+  /api/auth/rol/{name}:
+    get:
+      tags:
+        - rol/roles
+      summary: Optener el id del rol
+  /api/auth/rol/status:
+    put:
+      tags:
+        - rol/roles
+      summary: Cambia el estado del rol
+  /api/auth/rol/{id}:
+    delete:
+      tags:
+        - rol/roles
+      summary: Elimina el rol
+  /api/auth/user/:
+    get:
+      tags:
+        - users
+    post:
+      tags:
+        - users
+    put:
+      tags:
+        - users
+  /api/auth/user/{id}:
+    get:
+      tags:
+        - users
+    delete:
+      tags:
+        - users
+      summary: Elimina el usuario
+  /api/auth/user/search:
+    post:
+      parameters:
+        - name: find
+          in: query
+      responses:
+        '200':
+          description: OK
+      tags:
+        - users
+  /api/auth/supplier/:
+    get:
+      tags:
+        - supplier/proveedores
+      summary: Obtiene todos los proveedores
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - supplier/proveedores
+  /api/auth/category/:
+    get:
+      tags:
+        - category/categoria
+      summary: Obtiene todas las categorías
+      responses:
+        '200':
+          description: OK
+    post:
+      tags:
+        - category/categoria
+  /api/auth/category/{id}:
+    get:
+      tags:
+        - category/categoria
+    put:
+      tags:
+        - category/categoria
+      summary: Actualiza la categoría
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id de la categoria
+      responses:
+        '200':
+          description: OK
+        '400':
+          description: Error al actualizar la categoría
+        '404':
+          description: Categoría no encontrada
+    delete:
+      tags:
+        - category/categoria
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Id de la categoria
+      responses:
+        '200':
+          description: OK
+        '404':
+          description: Categoría no encontrada
+        '500':
+          description: Error al eliminar la categoría

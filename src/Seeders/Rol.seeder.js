@@ -64,6 +64,38 @@ const rolWorker =  async () => {
     }
 }
 
+const rolClient = async() => {
+    const rolClient = await Roles.findOne({ name: 'Client' });
+    if (!rolClient) {
+        try{
+            const privileges = {
+                read: false,
+                create: false,
+                update: false,
+                delete: false,
+                download: false
+            }
+            const permissions = {
+                rol: privileges,
+                user : privileges,
+                access : { read:true, create:true, update:true, delete:true, download: true },
+                shopping : privileges,
+                supplier : privileges,
+                category : privileges,
+                product : privileges,
+                client : privileges,
+                productOrder : { read:true, create:true, update:false, delete:false, download:true},
+                sale : privileges,
+            }
+            // Create a new admin role with all permissions
+            const rol = await Roles.create({ name: 'Client' , permissions: permissions }); 
+            rol.save()
+            console.log("Successfully created admin");
+        }
+        catch(error){ console.error('Error al crear rol Admin', error); }
+    }
+}
+
 const getRol = async ( name ) => {
     console.log( name );
     
@@ -71,4 +103,4 @@ const getRol = async ( name ) => {
     return rolAdmin._id;
 }
 
-export { rolAdmin, rolWorker, getRol}
+export { rolAdmin, rolWorker, rolClient, getRol}

@@ -4,13 +4,13 @@ import validateInformationField from "../Tools/creation.tool"
 const INFO_USER = [
   "typeIdentifier", "documentNumber", "username",
   "password", "email", "firstName", "lastName",
-  "phone", "birthdate", "address", "rol", "state"
+  "phone", "birthdate", "address", "rol", "city", "country"
 ]
 
 const INFO_CLIENT = [
   "typeIdentifier", "documentNumber", "username",
   "password", "email", "firstName", "lastName",
-  "phone", "birthdate", "address"
+  "phone", "birthdate", "address", "city", "country"
 ]
 
 //verify and clean date information (check all)
@@ -51,10 +51,10 @@ const makeClient = async ( req, res, next ) =>{
 
   const user = await Users.findOne({ email:body["email"] })
   if( user !== null ) return res.status(400).json({message: 'El correo ya se encuentra registrado'})
-
+  
   const [ isOk, message, json ] = validateInformationField( INFO_CLIENT, body )
   if( !isOk ) return res.status(400).json({message, success: false})
-  json.rol = "Worker"
+  json.rol = "Client"
   req.body = json
   next()
 }

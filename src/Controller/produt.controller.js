@@ -1,13 +1,23 @@
 import Products from "../Models/Products";
 import validateInformationField from "../Tools/creation.tool";
+import { v2 as cloudinary } from 'cloudinary';
 
 const PRODUCT_VALUES = [
     "name", "price", "totalQuantity",
     "category", "classification", "details"
 ]
 
+cloudinary.config({ 
+    cloud_name: 'photenix', 
+    api_key: '192637173257687', 
+    api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
 const getProducts = async ( req, res ) =>{
-    const products = await Products.find();
+    const limit = req.query.limit || 10
+    const page = req.query.page || 1
+    const offset = (page - 1)  * limit
+    const products = await Products.find().skip(offset).limit(limit);
     res.status(200).json(products);
 }
 
@@ -21,11 +31,22 @@ const getProductById = async ( req, res ) => {
     }
 }
 
+const searchProducts = async ( req, res ) => {
+    const { find } = req.body
+    try{
+        const products = await Products.find({ name: { $regex: `^${find}.*`, $options: 'i' } },);
+        res.status(200).json({ data: products, success: true });
+    }
+    catch(e){
+        res.status(500).json({ message: 'Error al buscar productos', error: e.message, success: false });
+    }
+}
+
 const createProduct = async ( req, res ) => {
     try{
-        const [ succes, message, info ] = validateInformationField( PRODUCT_VALUES, req.body )
+        const [ success, message, info ] = validateInformationField( PRODUCT_VALUES, req.body )
         //return a status error user
-        if( succes === false ) return res.status(400).json({ message, success: false });
+        if( success === false ) return res.status(400).json({ message, success: false });
 
         if( info.details.length === 0 ) return res.status(400).json({ message: "Not exist detail, min detail is 1", success: false });
 
@@ -35,6 +56,21 @@ const createProduct = async ( req, res ) => {
     }
     catch(e){
         res.json({ message: 'Error al crear el producto', error: e.message, success: false });
+    }
+}
+
+const createProductImage = async ( req, res ) => {
+    try {
+        const fileStr = req.body.data;
+        const uploadResponse = await cloudinary.uploader.upload(fileStr, {
+            upload_preset: 'ml_default',
+            folder: 'Boutique'
+        });
+        // console.log(uploadResponse);
+        res.json({ msg: 'created image', img: uploadResponse.url });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ err: 'Something went wrong' });
     }
 }
 
@@ -52,15 +88,16 @@ const updateProduct = async ( req, res ) => {
         }
 
         const product = await Products.findByIdAndUpdate(id, changes);
-        res.json({ message: 'Producto actualizado correctamente', data: "product", success: true });
+        res.json({ message: 'Producto actualizado correctamente', data: product, success: true });
     }
     catch(e){
         res.json({ message: 'Error al actualizar el producto', error: e.message, success: false });
     }
 }
 
+
 const deleteProduct = async ( req, res ) => {
-    const { id } = req.body;
+    const { id } = req.params;
     try{
         const product = await Products.findByIdAndDelete(id);
         res.json({ message: 'Producto eliminado correctamente', data: product, success: true });
@@ -81,4 +118,4 @@ const deleteDetailProduct = async ( req, res ) => {
     }
 }
 
-export { getProducts, getProductById, createProduct, updateProduct, deleteProduct, deleteDetailProduct }
+export { getProducts, getProductById, searchProducts, createProduct, createProductImage, updateProduct, deleteProduct, deleteDetailProduct }

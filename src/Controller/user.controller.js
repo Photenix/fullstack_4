@@ -2,8 +2,12 @@ import Users from '../Models/Users';
 import { getRolAll, getRolID, getRolName } from '../Tools/rol.tool'
 
 const getUsers = async (req, res) => {
+    const limit = req.query.limit || 10
+    const page = req.query.page || 1
+    const offset = (page - 1)  * limit
+
     const roles = await getRolAll()
-    const users = await Users.find().lean()
+    const users = await Users.find().skip(offset).limit(limit).lean()
 
     for (let i = 0; i < users.length; i++) {
         const user = users[i]
@@ -15,14 +19,24 @@ const getUsers = async (req, res) => {
 }
 
 const findUser = async (req, res) => {
-    const info = req.body 
+    const { find } = req.body 
 
-    for (const inf of Object.keys(info)) {
-        info[ inf ] = { $regex: `${info[inf]}.*`, $options: 'i' }
-    }
+    // for (const inf of Object.keys(info)) {
+    //     info[ inf ] = { $regex: `${info[inf]}.*`, $options: 'i' }
+    // }
     
-    const users = await Users.find( info ).lean();
-    if( users.length === 0 ) return res.status(404).json({ message: 'No se encontraron usuarios con ese nombre' });
+    const users = await Users.find({
+        $or: [
+            { lastName: { $regex: `${find}.*`, $options: 'i' } },
+            { firstName: { $regex: `${find}.*`, $options: 'i' } },
+            { email: { $regex: `${find}.*`, $options: 'i' } },
+            { phone: { $regex: `${find}.*`, $options: 'i' } },
+            { documentNumber: { $regex: `${find}.*`, $options: 'i' } }
+        ]
+    }).lean();
+
+    if( users.length === 0 ) return res.status(404).json({ message: 'No se encontraron usuarios que tenga esa información' });
+
     const roles = await getRolAll()
     for (let i = 0; i < users.length; i++) {
         const user = users[i]
@@ -76,7 +90,7 @@ const updateUser = async ( req, res ) => {
 
 const deleteUser = async (req, res) => {
     try{
-        const { id } = req.body;
+        const { id } = req.params;
         const user = await Users.findByIdAndDelete(id)
         
         if(!user) return res.status(404).json({ message: 'No se encontró el usuario' });

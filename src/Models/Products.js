@@ -4,17 +4,25 @@ const productDetailSchema = new Schema({
     color: {
         type: String,
         required: true,
-        enum: ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Purple', 'Gray', 'Orange', 'Pink', 'Brown', 'Other']
+        // enum: ['Red', 'Blue', 'Green', 'Black', 'White', 'Yellow', 'Purple', 'Gray', 'Orange', 'Pink', 'Brown', 'Other']
     },
     size: {
         type: String,
         required: true,
-        enum: ['XS','S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Other']
+        // enum: ['XS','S', 'M', 'L', 'XL', 'XXL', 'XXXL', 'Other']
     },
     quantity: {
         type: Number,
         required: true,
         min: 0
+    },
+    image: {
+        type: Schema.Types.Mixed,
+        required: true,
+        // validate: {
+        //     validator: (v) => /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._\+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_\+.~#?&//=]*)$/.test(v),
+        //     message: 'Please enter a valid URL'
+        // }
     }
 })
 

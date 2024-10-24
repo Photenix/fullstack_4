@@ -11,6 +11,8 @@ const userSchema = new Schema({
     lastName: { type: String, required: true },
     phone: { type: String, required: true, unique: true },
     birthdate: { type: Date, required: true },
+    country: { type: String, required: true },
+    city: { type: String, required: true },
     address: { type: String, required: false },
     userCreationDate: { type: Date, required:true, default: new Date() },
     rol: { type: Schema.Types.ObjectId, required: true, ref: 'rol' },

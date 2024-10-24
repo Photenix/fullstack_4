@@ -18,6 +18,8 @@ const verify = ( req, res, next ) => {
     jwt.verify(token, SECRET_KEY, async (err, decoded) => {
         if (err) return res.status(401).json({ message: 'Token inválido' });
         req.user = decoded;
+        // console.log( req.user );
+        
         next();
     })
 }
@@ -36,6 +38,7 @@ const hasPermission = async (req, res, next) => {
 
     try{
         let instance = req.originalUrl
+        
         instance = instance.slice("/api/auth/".length)
         instance = instance.split("/")[0]
     
@@ -43,7 +46,9 @@ const hasPermission = async (req, res, next) => {
     
         const rol = await getRolAllInfo( req.user.rol )    
         const { permissions } = rol
-    
+
+        if( instance === "purchase" ) instance = "shopping"
+
         if( permissions[instance][method] ) return next()
         
         return res.status(403).json({ message: 'No tienes permisos para realizar esta acción' });
