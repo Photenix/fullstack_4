@@ -6,6 +6,7 @@ const bodyParser = require('body-parser');
 const { engine } = require('express-handlebars')
 const mainRoutes = require('./Router/index.routes')
 const authRoutes = require('./Router/auth.routes')
+const path = require('path');
 
 class Service {
     constructor( dir ) {
@@ -13,7 +14,7 @@ class Service {
         this.app = express()
         this.settersApp()
         // this.viewEngine()
-        this.app.use(express.static(dir + "\\static"))
+        this.app.use(express.static( path.join( dir, "static" )))
         this.routes()
     }
 
