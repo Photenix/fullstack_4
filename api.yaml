@@ -180,3 +180,177 @@ paths:
           description: Categoría no encontrada
         '500':
           description: Error al eliminar la categoría
+  /api/auth/product/:
+    get:
+      tags:
+        - producto
+      summary: Obtiene todos los productos
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+    post:
+      tags:
+        - producto
+      summary: Crea un nuevo producto
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                description:
+                  type: string
+                price:
+                  type: number
+                totalQuantity:
+                  type: integer
+                category:
+                  type: string
+                classification:
+                  type: string
+                details:
+                  type: object
+                  properties:
+                    color:
+                      type: string
+                    size:
+                      type: string
+                    quantity:
+                      type: integer
+                    image:
+                      type: string
+                state:
+                  type: boolean
+              required:
+                - name
+                - description
+                - price
+                - stock
+                - category
+      responses:
+        "200":
+          description: Producto creado
+        "400":
+          description: Error al crear el producto
+        "401":
+          description: Sin permisos para crear el producto
+    put:
+      tags:
+        - producto
+      summary: Actualiza un producto
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Producto actualizado
+        "400":
+          description: Error al actualizar el producto
+  /api/auth/product/{id}:
+    get:
+      tags:
+        - producto
+      summary: Obtiene un producto por id
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Producto encontrado
+        "404":
+          description: Producto no encontrado
+    delete:
+      tags:
+        - producto
+      summary: Elimina un producto
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Producto eliminado
+        "404":
+          description: Producto no encontrado
+        "500":
+          description: Error al eliminar el producto
+        
+  /api/auth/product/search:
+    post:
+      tags:
+        - producto
+      summary: Busca productos por nombre o código
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Productos encontrados
+        "404":
+          description: Productos no encontrados
+  /api/auth/product/img:
+    post:
+      tags:
+        - producto
+      summary: Sube una imagen de producto
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Imagen subida con éxito
+        "400":
+          description: Error al subir la imagen
+
+  /api/auth/product/detail:
+    delete:
+      tags:
+        - producto
+      summary: Elimina detalles de un producto
+      parameters:
+        - in: header
+          name: Authorization
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Detalles eliminados con éxito
+        "400":
+          description: Error al eliminar los detalles
+  
+
+  

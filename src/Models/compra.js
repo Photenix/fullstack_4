@@ -1,38 +1,48 @@
-// backend/src/Models/Purchase.js
+// Models/compra.js
 import mongoose from 'mongoose';
 
 const PurchaseSchema = new mongoose.Schema({
-    supplier:  {
-        // type: mongoose.Schema.Types.ObjectId,
+    invoiceNumber: {
         type: String,
+        required: true,
+        unique: true
+    },
+    supplierId: {
+        type: mongoose.Schema.Types.ObjectId,
         ref: 'Supplier',
         required: true
     },
-    product: {
-        type: {String},
-        required: true
-    },
-    quantity: {
-        type: Number,
-        required: true
-    },
-    price: {
-        type: Number,
-        required: true
-    },
+    products: [{
+        productId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Product',
+            required: true
+        },
+        quantity: {
+            type: Number,
+            required: true,
+            min: 1
+        },
+        price: {
+            type: Number,
+            required: true,
+            min: 0
+        }
+    }],
     total: {
         type: Number,
-        required: true
+        required: true,
+        min: 0
     },
     purchaseDate: {
         type: Date,
         default: Date.now
     },
-    state:{
-        type:Boolean,
-        default: true
+    status: {
+        type: String,
+        enum: ['Active', 'Canceled'],
+        default: 'Active'
     }
-    
 });
 
 const Purchase = mongoose.model('Purchase', PurchaseSchema);

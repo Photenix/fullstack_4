@@ -13,10 +13,10 @@ const verify = ( req, res, next ) => {
     
     // const token = req.cookies.token;
     
-    if (!token) return res.status(401).json({ message: 'No hay token' });
+    if (!token) return res.status(401).json({ message: 'No hay token', success: false });
     
     jwt.verify(token, SECRET_KEY, async (err, decoded) => {
-        if (err) return res.status(401).json({ message: 'Token inválido' });
+        if (err) return res.status(401).json({ message: 'Token inválido', success: false });
         req.user = decoded;
         // console.log( req.user );
         
@@ -41,6 +41,7 @@ const hasPermission = async (req, res, next) => {
         
         instance = instance.slice("/api/auth/".length)
         instance = instance.split("/")[0]
+        instance = instance.split("?")[0]
     
         if( instance === "profile" ) return next()
     
@@ -49,11 +50,17 @@ const hasPermission = async (req, res, next) => {
 
         if( instance === "purchase" ) instance = "shopping"
 
+        // console.log( instance );
+        // console.log( permissions[instance] || null );
+        // console.log( permissions[instance]["read"] || null );
+        
         if( permissions[instance][method] ) return next()
         
-        return res.status(403).json({ message: 'No tienes permisos para realizar esta acción' });
+        return res.status(403).json({ message: 'No tienes permisos para realizar esta acción', success: false });
     }
     catch( err ){
+        console.log( err );
+        
         return res.status(400).json({ message: 'Error al validar permisos', error: err });
     }
 }

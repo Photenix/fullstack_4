@@ -1,5 +1,7 @@
 import mongoose from 'mongoose';
 import Cliente from '../Models/cliente.js';
+import { getRolAll, getRolID } from '../Tools/rol.tool.js';
+import Users from '../Models/Users.js';
 
 // Obtener todos los clientes
 export const clientFindAll = async (req, res) => {
@@ -10,6 +12,43 @@ export const clientFindAll = async (req, res) => {
         res.status(500).json({ message: 'Error al obtener los clientes', error });
     }
 };
+
+//Return the number of client
+export const getClientQuantity = async (req, res) => {
+    try{
+        const roleClient = await getRolID("Client")
+        const count = await Users.countDocuments({ rol: roleClient })
+        return res.json({ quantity: count });
+    }
+    catch(e){
+        res.status(404).json({message:'Error al obtener la cantidad de usuarios', error: e.message, success: false});
+    }
+}
+
+export const getClient = async (req, res) => {
+    try{
+        const limit = req.query.limit || 10
+        const page = req.query.page || 1
+        const offset = (page - 1)  * limit
+        
+        const roles = await getRolAll()
+        const roleClient = await getRolID("Client")
+        const users = await Users.find({ rol: roleClient }).skip(offset).limit(limit).lean()
+    
+        for (let i = 0; i < users.length; i++) {
+            const user = users[i]
+            user.password = "*****"; // Evitar que se muestre la contraseña en la respuesta JSON
+            let rol = roles.find( e => user.rol.equals(e._id) )
+            user.rol = rol.name
+        }
+
+        return res.json(users);
+    }
+    catch(e){
+        return res.status(500).json({ message: 'Error: '+e, success: false })
+    }
+}
+
 
 // Obtener cliente por ID
 export const clientFindById = async (req, res) => {
@@ -24,43 +63,55 @@ export const clientFindById = async (req, res) => {
     }
 };
 
-// Crear un nuevo cliente
+
+
+
+// Crear un nuevo cliente (simulado)
 export const clientCreate = async (req, res) => {
     const { nombreCompleto, direccion, ciudad, telefono, email, documentoIdentidad, pais } = req.body;
-  
-    try {
-      const existingClient = await Cliente.findOne({
-        $or: [
-          { email: email },
-          { 'documentoIdentidad.numero': documentoIdentidad.numero }
-        ]
-      });
-  
-      if (existingClient) {
-        return res.status(400).json({ 
-          message: 'Ya existe un cliente con ese email o número de documento', 
-          success: false 
-        });
-      }
-  
-      const client = new Cliente({
-        nombreCompleto,
-        direccion,
-        ciudad,
-        telefono,
-        email,
-        documentoIdentidad,
-        pais
-      });
-  
-      await client.save();
-      res.status(201).json({ message: 'Cliente creado con éxito', client, success: true });
-    } catch (error) {
-      console.error('Error al crear el cliente:', error);
-      res.status(500).json({ message: 'Error al crear el cliente', error: error.message, success: false });
+
+    // Verificar si existe un campo 'id' y eliminarlo si está presente
+    if (req.body.id) {
+        delete req.body.id;
     }
-  };
-  
+
+    try {
+        // Verificar si ya existe un cliente con el mismo email o número de documento
+        const existingClient = await Cliente.findOne({
+            $or: [
+                { email: email },
+                { 'documentoIdentidad.numero': documentoIdentidad.numero }
+            ]
+        });
+
+        if (existingClient) {
+            return res.status(400).json({ 
+                message: 'Ya existe un cliente con ese email o número de documento', 
+                success: false 
+            });
+        }
+
+        // Crear el cliente
+        const client = new Cliente({
+            nombreCompleto,
+            direccion,
+            ciudad,
+            telefono,
+            email,
+            documentoIdentidad,
+            pais
+        });
+
+        // Guardar el cliente en la base de datos
+        await client.save();
+        res.status(201).json({ message: 'Cliente creado con éxito', client, success: true });
+    } catch (error) {
+        console.error('Error al crear el cliente:', error);
+        res.status(500).json({ message: 'Error al crear el cliente', error: error.message, success: false });
+    }
+};
+
+
 // Actualizar un cliente existente
 export const clientUpdate = async (req, res) => {
     const { id } = req.params;
@@ -69,11 +120,6 @@ export const clientUpdate = async (req, res) => {
     // Validar si el ID es un ObjectId válido
     if (!mongoose.Types.ObjectId.isValid(id)) {
         return res.status(400).json({ message: 'ID no válido' });
-    }
-
-    // Validar tipo de documento de identidad (si se envía)
-    if (documentoIdentidad && !['CC', 'DPI', 'Pasaporte', 'TI', 'CE', 'NIT'].includes(documentoIdentidad.tipo)) {
-        return res.status(400).json({ message: 'Tipo de documento de identidad inválido' });
     }
 
     try {

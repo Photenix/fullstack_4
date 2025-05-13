@@ -42,6 +42,7 @@ const permissionsSchema = new Schema({
 
 const rolesSchema = new Schema({
     name: { type: String, required: true, unique: true },
+    state: { type: Boolean, required: true, default: true },
     permissions : {
         type : permissionsSchema ,
         default : {
@@ -57,7 +58,6 @@ const rolesSchema = new Schema({
             sale : defPrivileges,
         },
     },
-    state: { type: Boolean, required: true, default: true }
 })
 
 export default model('Role', rolesSchema)

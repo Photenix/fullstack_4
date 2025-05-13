@@ -11,7 +11,7 @@ const getRolName = async ( id ) => {
 }
 
 const getRolAllInfo = async ( id ) => {
-    const rol = await Roles.findById(id);
+    const rol = await Roles.findById(id).lean();
     return rol;
 }
 

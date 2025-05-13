@@ -9,7 +9,9 @@ const INFO_PRIVILEGES = [ "read", "create", "delete", "update", "download" ]
 
 const checkPermissions = async ( req, res, next ) => {
     try{
-        const { id, permissions } = req.body
+        const { id } = req.params
+        const { permissions } = req.body
+        
         const rol = await Roles.findById(id).lean();
 
         for (let i = 0; i < INFO_PERMISSIONS.length; i++) {
@@ -37,6 +39,7 @@ const checkPermissions = async ( req, res, next ) => {
         next()
     }
     catch( err ){
+        // console.log( err );
         return res.status(400).json({ message: 'Error al validar permisos' });
     }
 }

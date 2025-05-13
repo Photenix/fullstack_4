@@ -1,10 +1,13 @@
 import Products from "../Models/Products";
 import validateInformationField from "../Tools/creation.tool";
 import { v2 as cloudinary } from 'cloudinary';
+import { getCategories } from "../Tools/product.tool";
 
 const PRODUCT_VALUES = [
-    "name", "price", "totalQuantity",
-    "category", "classification", "details"
+    "name", "totalQuantity",
+    "category", "classification", "details",
+    "description", "images"
+    // "name", "price", "totalQuantity", "color",
 ]
 
 cloudinary.config({ 
@@ -13,12 +16,49 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
+const getProductQuantity = async (req, res) => {
+    try {
+        const count = await Products.countDocuments({})
+        return res.status(200).json({ quantity: count, success: true });
+    } catch (error) {
+        console.log( error );
+        res.status(500).json({ message: error.message, success: false });
+    }
+}
+
 const getProducts = async ( req, res ) =>{
-    const limit = req.query.limit || 10
-    const page = req.query.page || 1
-    const offset = (page - 1)  * limit
-    const products = await Products.find().skip(offset).limit(limit);
-    res.status(200).json(products);
+    try{
+        
+        const listCategories = await getCategories()
+        //get 10 products by default
+        const limit = req.query.limit || 10
+        const page = req.query.page || 1
+        const offset = (page - 1)  * limit
+
+        const classification = req.query.classification || ""
+
+        let products
+        
+        /*
+        if( classification !== ""){
+            products = await Products.find({ classification: classification }).skip(offset).limit(limit);
+        }
+        */
+
+        products = await Products.find().skip(offset).limit(limit);
+
+        let cleanProduct = products.map(product => {
+            return {
+                ...product._doc,
+                category: listCategories[product.category] || "Camisa"
+            }
+        })
+
+        res.status(200).json({ data: cleanProduct, success: true });
+    }
+    catch(e){
+        res.status(500).json({ message: 'Error al obtener los productos', error: e.message, success: false });
+    }
 }
 
 const getProductById = async ( req, res ) => {
@@ -30,15 +70,50 @@ const getProductById = async ( req, res ) => {
         res.status(404).json({ message: 'Error producto no encontrado', error: e.message, success: false });
     }
 }
-
 const searchProducts = async ( req, res ) => {
-    const { find } = req.body
     try{
-        const products = await Products.find({ name: { $regex: `^${find}.*`, $options: 'i' } },);
-        res.status(200).json({ data: products, success: true });
+        const { find } = req.body
+
+        const listCategories = await getCategories()
+
+        // Construir la consulta
+        
+        const query = {
+            $or: [
+                { name: { $regex: `^${find}.*`, $options: 'i' } }, // Buscar por nombre
+                { details: { $elemMatch: { barcode: { $regex: `^${find}.*`, $options: 'i' } } } } // Buscar en detalles
+            ]
+        };
+
+        // const query = { name: { $regex: `^${find}.*`, $options: 'i' } }
+
+        const products = await Products.find(query).lean();
+
+        let cleanProduct = products.map(product => {
+            return {
+                ...product,
+                category: listCategories[product.category] || "Camisa"
+            }
+        })
+
+        return res.status(200).json({ data: cleanProduct, success: true });
     }
     catch(e){
-        res.status(500).json({ message: 'Error al buscar productos', error: e.message, success: false });
+        return res.status(500).json({ message: 'Error al buscar productos', error: e.message, success: false });
+    }
+}
+
+const createManyProducts = async ( req, res ) => {
+    try{
+        const { products } = req.body
+        const newProducts = await Products.insertMany(products);
+        return res.status(200).json({ message: 'Productos creados correctamente', data: newProducts, success: true });
+    }
+    catch(e){
+        if( e.code === 11000 ){
+            return res.status(400).json({ message:'En el csv hay productos existentes en stock que tienen el mismo nombre', success: false })
+        }
+        return res.status(500).json({ message: 'Error al crear los productos', error: e.message, success: false });
     }
 }
 
@@ -52,10 +127,14 @@ const createProduct = async ( req, res ) => {
 
         const product = new Products(info);
         await product.save();
-        res.json({ message: 'Producto creado correctamente', data: product, success: true });
+        return res.status(200).json({ message: 'Producto creado correctamente', data: product, success: true });
     }
     catch(e){
-        res.json({ message: 'Error al crear el producto', error: e.message, success: false });
+        // console.log( e );
+        if( e.code === 11000 ){
+            return res.status(400).json({ message:'Ya existe un producto con ese nombre', success: false })
+        }
+        return res.status(500).json({ message: 'Error al crear el producto', error: e.message, success: false });
     }
 }
 
@@ -67,16 +146,18 @@ const createProductImage = async ( req, res ) => {
             folder: 'Boutique'
         });
         // console.log(uploadResponse);
-        res.json({ msg: 'created image', img: uploadResponse.url });
+        return res.status(200).json({ msg: 'created image', img: uploadResponse.url });
     } catch (err) {
         console.error(err);
-        res.status(500).json({ err: 'Something went wrong' });
+        return res.status(500).json({ err: 'Something went wrong' });
     }
 }
 
 const updateProduct = async ( req, res ) => {
-    const { id, changes } = req.body;
     try{
+        const id = await Products.findById(req.params.id);
+        const { changes } = req.body;
+        /*
         if( changes.details !== undefined  && changes?.details.length !== 0 ){
             if( changes.details.length > 1 ){
                 //intera mas de un detalle de producto
@@ -86,36 +167,47 @@ const updateProduct = async ( req, res ) => {
             else await Products.findByIdAndUpdate(id, { $push: { details: changes.details } });
             delete changes.details
         }
-
-        const product = await Products.findByIdAndUpdate(id, changes);
-        res.json({ message: 'Producto actualizado correctamente', data: product, success: true });
+        */
+        // new true para que me devuelva el producto actualizado
+        const product = await Products.findByIdAndUpdate(id, changes, { new: true });
+        return res.status(200).json({ message: 'Producto actualizado correctamente', data: product, success: true });
     }
     catch(e){
-        res.json({ message: 'Error al actualizar el producto', error: e.message, success: false });
+        return res.status(500).json({ message: 'Error al actualizar el producto', error: e.message, success: false });
     }
 }
 
 
 const deleteProduct = async ( req, res ) => {
-    const { id } = req.params;
     try{
+        const { id } = req.params;
         const product = await Products.findByIdAndDelete(id);
         res.json({ message: 'Producto eliminado correctamente', data: product, success: true });
+        // const product = await Products.findById(id);
+        // res.json({ message: 'Producto eliminado correctamente', data: product, success: true });
     }
     catch(e){
-        res.json({ message: 'Error al eliminar el producto', error: e.message, success: false });
+        return res.status(500).json({ message: 'Error al eliminar el producto', error: e.message, success: false });
     }
 }
 
 const deleteDetailProduct = async ( req, res ) => {
-    const { id, detailId } = req.body;
     try{
-        const product = await Products.findByIdAndUpdate(id, { $pull: { details: { _id: detailId } } });
-        res.json({ message: 'Detalle eliminado correctamente', data: product, success: true });
+        //id of detail product
+        const { id } = req.params;
+        //! add quality of don note delete if on purchase or order is present
+        //the $pull operator removes all instances of a specified value from an array
+        // const product = await Products.findByIdAndUpdate({ "details._id": id }, { $pull: { details: { _id: id } } });
+        const product = await Products.findOneAndUpdate({ "details._id": id }, { $pull: { details: { _id: id } } }, { new: true });
+        return res.json({ message: 'Detalle eliminado correctamente', data: product, success: true });
     }
     catch(e){
-        res.json({ message: 'Error al eliminar el detalle', error: e.message, success: false });
+        console.log( e );
+        
+        return res.status(500).json({ message: 'Error al eliminar el detalle', error: e.message, success: false });
     }
 }
 
-export { getProducts, getProductById, searchProducts, createProduct, createProductImage, updateProduct, deleteProduct, deleteDetailProduct }
+export { 
+    getProductQuantity, getProducts, getProductById, searchProducts, createManyProducts,
+    createProduct, createProductImage, updateProduct, deleteProduct, deleteDetailProduct }

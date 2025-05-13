@@ -84,7 +84,9 @@ const addSubcategoria = async (req, res) => {
     res.status(500).json({ message: 'Error al añadir la subcategoría', error });
   }
 };
-// Actualizar subcategoría
+
+
+
 // Actualizar subcategoría
 const updateSubcategoria = async (req, res) => {
   try {

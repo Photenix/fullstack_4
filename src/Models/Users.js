@@ -20,7 +20,9 @@ const userSchema = new Schema({
     state: { type: Boolean, required: true, default: true }
 })
 
-userSchema.pre("save", async function(next){
+
+userSchema.pre('save', async function(next) {
+    // 'this' se refiere al documento que se está guardando
     if (!this.isModified('password')) return next();
     const saltRounds = 10;
     try {
@@ -29,6 +31,22 @@ userSchema.pre("save", async function(next){
     } catch (error) {
         next(error);
     }
-})
+});
+
+
+// Middleware para encriptar la contraseña antes de actualizar
+userSchema.pre("findOneAndUpdate", async function(next) {
+    const update = this.getUpdate();
+    if (update && update.password) {
+        const saltRounds = 10;
+        try {
+            update.password = await bcrypt.hash(update.password, saltRounds);
+        } catch (error) {
+            return next(error);
+        }
+    }
+    next();
+});
+
 
 export default model('User', userSchema)

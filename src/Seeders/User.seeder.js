@@ -16,6 +16,8 @@ const adminUser = async ( idRol ) => {
             gender: "M",
             phone: "6543210987",
             address: "Calle 123, 456, 789",
+            country: "Colombia",
+            city: "Medellin",
             state: true,
             rol: idRol
         })
@@ -47,6 +49,8 @@ const workersUsers = async ( idRol ) => {
             gender: "M",
             phone: "6543210988",
             address: "Calle 456, 789, 1011",
+            country: "Colombia",
+            city: "Medellin",
             state: true,
             rol: idRol
         })
@@ -67,6 +71,8 @@ const workersUsers = async ( idRol ) => {
             gender: "M",
             phone: "6543210989",
             address: "Calle 789, 1011, 1213",
+            country: "Colombia",
+            city: "Medellin",
             state: true,
             rol: idRol
         })
@@ -87,6 +93,8 @@ const workersUsers = async ( idRol ) => {
             gender: "M",
             phone: "6543210990",
             address: "Calle 1011, 1213, 1415",
+            country: "Colombia",
+            city: "Medellin",
             state: true,
             rol: idRol
         })
