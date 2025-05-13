@@ -30,13 +30,7 @@ import {
   updateSubcategoria,
   deleteSubcategoria,
 } from "../Controller/categoria.controller.js";
-import {
-  obtenerDetallesVenta,
-  obtenerDetallesPorVenta,
-  crearDetalleVenta,
-  actualizarDetalleVenta,
-  // eliminarDetalleVenta
-} from "../Controller/detalleVenta.controller.js";
+
 
 import {
   // actualizarDevolucion,
@@ -54,6 +48,13 @@ import {
   cancelPurchase 
 } from "../Controller/compra.controller.js";
 import { getProductsClient } from "../Controller/product.client.controller.js";
+import {
+  obtenerDetallesVenta,
+  obtenerDetallesPorVenta,
+  crearDetalleVenta,
+  actualizarDetalleVenta,
+  // eliminarDetalleVenta
+} from "../Controller/detalleventa.controller.js";
 
 const router = Router();
 
