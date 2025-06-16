@@ -1,5 +1,7 @@
-import { Router } from "express";
-import {
+const { Router } = require("express")
+
+// CONTROLADORES
+const {
   confirmPIN,
   confirmToken,
   deleteAccount,
@@ -9,18 +11,30 @@ import {
   logout,
   newPassword,
   resendPIN,
-} from "../Controller/access.controller.js";
-import { checkUserPA, makeClient } from "../Middlewares/user.mid.js";
-import { createUser, getUsers } from "../Controller/user.controller.js";
-import {
+} = require("../Controller/access.controller.js")
+
+const { makeClient } = require("../Middlewares/user.mid.js")
+
+const { createUser } = require("../Controller/user.controller.js")
+
+const {
   clientCreate,
   clientDelete,
   clientFindAll,
   clientFindById,
   clientUpdate,
-} from "../Controller/client.controller.js";
-import { crearVenta, obtenerVentas } from "../Controller/venta.controller.js";
-import {
+} = require("../Controller/client.controller.js")
+
+// CORREGIDO: Importar todas las funciones necesarias de venta.controller.js
+const {
+  actualizarEstadoVenta,
+  crearVenta,
+  obtenerVenta,
+  obtenerVentas,
+  obtenerVentasClienteId, // AGREGADO: función movida desde detalleVenta.controller.js
+} = require("../Controller/venta.controller.js")
+
+const {
   getCategorias,
   getCategoriaById,
   createCategoria,
@@ -29,103 +43,120 @@ import {
   addSubcategoria,
   updateSubcategoria,
   deleteSubcategoria,
-} from "../Controller/categoria.controller.js";
+} = require("../Controller/categoria.controller.js")
 
+// CORREGIDO: Importar todas las funciones necesarias de detalleVenta.controller.js
+const {
+  obtenerDetallesPorVenta,
+  crearDetalleVenta,
+  actualizarDetalleVenta,
+  obtenerDetallePorId, // AGREGADO: función que agregamos
+  eliminarDetalleVenta, // AGREGADO: función que agregamos
+} = require("../Controller/detalleVenta.controller.js")
 
-import {
-  // actualizarDevolucion,
-  crearDevolucion,
-  eliminarDevolucion,
-  obtenerDevoluciones,
-} from "../Controller/devolucion.controller.js";
+const devolucionController = require("../Controller/devolucion.controller.js")
+const detalleDevolucionController = require("../Controller/detalle.devolucion.controller.js")
 
-import {
+const {
   getPurchases,
   getPurchaseById,
   createPurchase,
   updatePurchase,
   deletePurchase,
-  cancelPurchase 
-} from "../Controller/compra.controller.js";
-import { getProductsClient } from "../Controller/product.client.controller.js";
-import {
-  obtenerDetallesVenta,
-  obtenerDetallesPorVenta,
-  crearDetalleVenta,
-  actualizarDetalleVenta,
-  // eliminarDetalleVenta
-} from "../Controller/detalleventa.controller.js";
+  cancelPurchase,
+} = require("../Controller/compra.controller.js")
+const { getProductsClient } = require("../Controller/product.client.controller.js")
 
-const router = Router();
+import { sendReceipt, getReceipt } from "../Controller/order.client.controller.js";
+
+const router = Router()
 
 // CLIENT
-router.get("/client", clientFindAll);
-router.get("/client/:id", clientFindById);
-router.post("/client", clientCreate);
-router.put("/client/:id", clientUpdate);
-router.delete("/client/:id", clientDelete);
+router.get("/client", clientFindAll)
+router.get("/client/:id", clientFindById)
+router.post("/client", clientCreate)
+router.put("/client/:id", clientUpdate)
+router.delete("/client/:id", clientDelete)
 
-//ACCESS
-//confirm if the user is authenticated
-router.get("/user/confirm", confirmToken);
-// router.get("/user", getUsers);
+// ACCESS
 
-router.post("/login", getToken);
-router.post('/logout', logout)
+router.get("/user/confirm", confirmToken)
+router.post("/login", getToken)
+router.post("/logout", logout)
+router.post("/register", makeClient, createUser)
+router.post("/pin", getPIN)
+router.post("/pin/:id", confirmPIN)
+router.post("/new-password", newPassword)
 
-router.post("/register", makeClient, createUser);
-
-router.post("/pin", getPIN);
-router.post("/pin/:id", confirmPIN);
-router.post("/new-password/", newPassword);
-
-router.put("/pin/:id", resendPIN);
+router.put("/pin/:id", resendPIN)
 router.put("/profile/edit/", editAccount)
 
-router.delete("/account", deleteAccount);
-
+router.delete("/account", deleteAccount)
 
 // Vista de productos cliente
-router.get("/products", getProductsClient);
+router.get("/products", getProductsClient)
 
-// CATEGORIES
-router.get('/category', getCategorias);
+// VENTAS
+router.get("/ventas", obtenerVentas)
+router.get("/ventas/cliente/:clienteId", obtenerVentasClienteId) // CORREGIDO: ahora viene de venta.controller.js
+router.get("/ventas/:id", obtenerVenta)
 
-//ARIANA
+router.post("/ventas", crearVenta)
+router.put("/ventas/actualizar-estado/:id", actualizarEstadoVenta) // CORREGIDO: ruta más específica
 
-//ventas: no delete ni update
-router.post("/ventas", crearVenta);
-router.get("/ventas", obtenerVentas);
+// DETALLE VENTA
+router.get("/detalleVenta/:ventaId", obtenerDetallesPorVenta)
+router.get("/detalleVenta/detalle/:id", obtenerDetallePorId) // AGREGADO: nueva ruta
 
-//detalle venta
-router.post("/detalleVenta", crearDetalleVenta);
-router.get("/detalleVenta", obtenerDetallesPorVenta);
-router.put("/detalleVenta", actualizarDetalleVenta);
-// router.delete("/detalleVenta", eliminarDetalleVenta);
+router.post("/detalleVenta", crearDetalleVenta)
 
-//devolucion
-router.post("/devolucion", crearDevolucion);
-router.get("/devolucion", obtenerDevoluciones);
-// router.put("/devolucion", actualizarDevolucion);
-router.delete("/devolucion", eliminarDevolucion);
+router.put("/detalleVenta/:id", actualizarDetalleVenta) // CORREGIDO: agregar :id
+router.delete("/detalleVenta/:id", eliminarDetalleVenta) // AGREGADO: ruta para eliminar
 
-//Categoria
-router.get("/categorias", getCategorias);
-router.get("/categorias/:id", getCategoriaById);
-router.post("/categorias", createCategoria);
-router.put("/categorias/:id", updateCategoria);
-router.delete("/categorias/:id", deleteCategoria);
+// DEVOLUCION
+router.get("/devoluciones", devolucionController.obtenerDevoluciones)
+router.get("/devoluciones/:id", devolucionController.obtenerDevolucionPorId)
 
-//Subcategoria
-router.post("/categorias/:id/subcategorias", addSubcategoria); // Añadir subcategoría
-router.put("/categorias/:id/subcategorias/:subId", updateSubcategoria);
-router.delete("/categorias/:id/subcategorias/:subId", deleteSubcategoria); // Eliminar subcategoría
+router.post("/devoluciones", devolucionController.crearDevolucion)
 
+router.put("/devoluciones/:id", devolucionController.actualizarDevolucion)
+
+router.delete("/devoluciones/:id", devolucionController.eliminarDevolucion)
+
+// DETALLES DEVOLUCION
+router.get("/detalles-devolucion/devolucion/:devolucionId", detalleDevolucionController.obtenerDetallesPorDevolucion)
+
+router.post("/detalles-devolucion", detalleDevolucionController.crearDetalleDevolucion)
+
+router.put("/detalles-devolucion/:id", detalleDevolucionController.actualizarDetalleDevolucion)
+
+router.delete("/detalles-devolucion/:id", detalleDevolucionController.eliminarDetalleDevolucion)
+
+// CATEGORIA
+router.get("/categorias", getCategorias)
+router.get("/categorias/:id", getCategoriaById)
+
+router.post("/categorias", createCategoria)
+
+router.put("/categorias/:id", updateCategoria)
+
+router.delete("/categorias/:id", deleteCategoria)
+
+// SUBCATEGORIA
+router.post("/categorias/:id/subcategorias", addSubcategoria)
+router.put("/categorias/:id/subcategorias/:subId", updateSubcategoria)
+router.delete("/categorias/:id/subcategorias/:subId", deleteSubcategoria)
+
+// COMPRA
 router.get("/compra", getPurchases);
 router.get("/compra/:id", getPurchaseById);
 router.post("/compra", createPurchase);
-router.put("/compra/:id", updatePurchase); // Modificado para incluir :id
-router.patch("/compra/:id/cancel", cancelPurchase); // Nueva ruta
+router.put("/compra/:id", updatePurchase);
+router.patch("/compra/:id/cancel", cancelPurchase);
 router.delete("/compra/:id", deletePurchase);
 
-module.exports = router;
+router.post('/order/:id/receipt', sendReceipt);
+router.get('/order/:id/receipt', getReceipt);
+
+// EXPORTACIÓN
+module.exports = router

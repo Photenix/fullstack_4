@@ -4,10 +4,13 @@ const productDetailSchema = new Schema({
     barcode :{
         describe: "The barcode has to be unique and is unique by product detail the main product has not be barcode",
         type: String,
-        required: true,
-        unique: true,
+        // required: true,
+        // unique: true,
         validate: {
-            validator: (v) => /^[0-9]{13}$/.test(v),
+            validator: (v) => {
+                if( v.length === 0 ) return true
+                return /^[0-9]{13}$/.test(v)
+            },
             message: 'Please enter a valid barcode (13 digits)'
         }
     },

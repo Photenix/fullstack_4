@@ -64,6 +64,41 @@ export const clientFindById = async (req, res) => {
 };
 
 
+export const findClient = async (req, res) => {
+    try{
+    const { find } = req.body 
+
+    const roles = await getRolAll()
+    const roleClient = await getRolID("Client")
+    
+    const users = await Users.find({
+        $or: [
+            { lastName: { $regex: `${find}.*`, $options: 'i' } },
+            { firstName: { $regex: `${find}.*`, $options: 'i' } },
+            { email: { $regex: `${find}.*`, $options: 'i' } },
+            { phone: { $regex: `${find}.*`, $options: 'i' } },
+            { documentNumber: { $regex: `${find}.*`, $options: 'i' } }
+        ],
+        rol: roleClient
+    }).lean();
+
+    if( users.length === 0 ) return res.status(404).json({ message: 'No se encontraron usuarios que tenga esa información' });
+
+    for (let i = 0; i < users.length; i++) {
+        const user = users[i]
+        user.password = "*****"; // Evitar que se muestre la contraseña en la respuesta JSON
+        let rol = roles.find( e => user.rol.equals(e._id) )
+        user.rol = rol.name
+    }
+
+    return res.status(200).json({ data: users, success: true});
+    }
+    catch(e){
+        return res.status(500).json({ message: 'Error: '+e, success: false })   
+    }
+}
+
+
 
 
 // Crear un nuevo cliente (simulado)

@@ -125,9 +125,15 @@ const confirmToken = async (req, res) => {
 const getProfile = async (req, res) => {
     const { user } = req
     if (!user) return res.status(401).json({ message: 'No hay usuario logueado' });
-    const realUser = await Users.findById(user._id).lean()
-    if (!realUser) return res.status(404).json({ message: 'No se encontró el usuario', success: false });
-    return res.json(realUser);
+    try {
+        // Modifica esta línea para incluir el _id en la consulta
+        const realUser = await Users.findById(user._id).lean();
+        if (!realUser) return res.status(404).json({ message: 'No se encontró el usuario', success: false });
+        return res.json(realUser);
+    } catch (error) {
+        console.error('Error al obtener el perfil:', error);
+        return res.status(500).json({ message: 'Error al obtener el perfil', success: false });
+    }
 }
 
 function generatePIN() {
@@ -279,7 +285,7 @@ const editAccount = async (req, res) => {
             }
             const user = await Users.findByIdAndUpdate( decoded._id, { username, firstName, lastName, phone, address }).lean()
             if( !user ) return res.status(404).json({ message: 'No se encontró el usuario', success: false });
-            return res.json({ message: 'Se ha modificado con éxito la cuenta', success: true});
+            return res.json({ message: 'Se ha modificado con éxito la cuenta', success: true, data: user });
         });
     }
     catch(e){

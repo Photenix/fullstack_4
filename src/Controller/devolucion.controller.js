@@ -1,218 +1,448 @@
-const Devolucion = require('../Models/devolucionModel');
-const DetalleDevolucion = require('../Models/detalleDevolucion');
-const Venta = require('../Models/ventaModel');
+const Devolucion = require("../Models/devolucionModel")
+const Venta = require("../Models/ventaModel")
+// Corregir la importación del modelo de productos
+const Product = require("../Models/Products").default // Añadido .default para importar el default export
 
-// Crear una nueva Devolución (Create)
+// IMPORTAR EL MODELO CORRECTO - usando el esquema existente
+const DetalleDevolucion = require("../Models/detalleDevolucion")
+
+// IMPORTAR EL NUEVO SERVICIO
+const DevolucionService = require("../services/devolucionService")
+
+// Crear una nueva devolución
 const crearDevolucion = async (req, res) => {
   try {
-    const { ventaId } = req.body;
-    
+    const { ventaId, productosDevueltos, motivo, totalDevuelto, fecha, estado } = req.body
+
+    // console.log("Datos recibidos para devolución:", { ventaId, productosDevueltos, motivo, totalDevuelto })
+
+    // Validaciones básicas
     if (!ventaId) {
-      return res.status(400).json({ message: 'El ID de venta es requerido' });
-    }
-    
-    // Verificar que la venta existe
-    const ventaExistente = await Venta.findById(ventaId);
-    if (!ventaExistente) {
-      return res.status(404).json({ message: 'La venta especificada no existe' });
-    }
-    
-    const devolucion = new Devolucion({
-      ventaId,
-      totalDevuelto: 0 // Inicialmente en cero, se actualizará con los detalles
-    });
-    
-    await devolucion.save();
-    //! Una venta tiene que cambiar de estado cuando la devolución se crea
-    res.status(201).json(devolucion);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
-
-// Obtener todas las Devoluciones (Read All)
-const obtenerDevoluciones = async (req, res) => {
-  try {
-    //! colocar limitación de objetos que puede traer
-    const devoluciones = await Devolucion.find().sort({ fecha: -1 });
-    res.status(200).json(devoluciones);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Obtener una Devolución por ID con sus detalles
-const obtenerDevolucionPorId = async (req, res) => {
-  try {
-    const devolucion = await Devolucion.findById(req.params.id);
-    
-    if (!devolucion) {
-      return res.status(404).json({ message: 'Devolución no encontrada' });
-    }
-    
-    // Obtener los detalles asociados
-    const detalles = await DetalleDevolucion.find({ devolucionId: devolucion._id });
-    
-    res.status(200).json({
-      devolucion,
-      detalles
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
-// Procesar una Devolución (aprobar o rechazar)
-const procesarDevolucion = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { accion } = req.body; // 'aprobar' o 'rechazar'
-    
-    if (!accion || (accion !== 'aprobar' && accion !== 'rechazar')) {
       return res.status(400).json({
         success: false,
-        message: 'Debe especificar una acción válida (aprobar o rechazar)'
-      });
+        message: "Se requiere ID de venta",
+      })
     }
-    
-    // Verificar que la devolución existe
-    const devolucion = await Devolucion.findById(id);
-    if (!devolucion) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'Devolución no encontrada' 
-      });
+
+    // Si se proporcionan productos específicos, usar la lógica completa
+    if (productosDevueltos && Array.isArray(productosDevueltos) && productosDevueltos.length > 0) {
+      return await procesarDevolucionCompleta(req, res)
     }
-    
-    // Obtener la venta original
-    const ventaOriginal = await Venta.findById(devolucion.ventaId);
+
+    // Si solo se proporciona el total (lógica simple existente)
+    const ventaExistente = await Venta.findById(ventaId)
+    if (!ventaExistente) {
+      return res.status(404).json({
+        success: false,
+        message: "La venta especificada no existe",
+      })
+    }
+
+    const nuevaDevolucion = new Devolucion({
+      ventaId,
+      totalDevuelto: totalDevuelto || 0,
+      estado: estado || "Pendiente",
+    })
+
+    // console.log( estado );
+
+    await nuevaDevolucion.save()
+
+    res.status(201).json({
+      success: true,
+      message: "Devolución creada exitosamente",
+      // devolucion: nuevaDevolucion,
+    })
+  } catch (error) {
+    console.error("Error al crear devolución:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error al crear la devolución",
+      error: error.message,
+    })
+  }
+}
+
+// FUNCIÓN ACTUALIZADA PARA USAR EL SERVICIO
+const procesarDevolucionCompleta = async (req, res) => {
+  try {
+    const { ventaId, productosDevueltos, motivo } = req.body
+
+    // Verificar que la venta existe
+    const ventaOriginal = await Venta.findById(ventaId)
     if (!ventaOriginal) {
       return res.status(404).json({
         success: false,
-        message: 'Venta original no encontrada'
-      });
+        message: "Venta no encontrada",
+      })
     }
-    
-    // Obtener todos los detalles de esta devolución
-    const detallesDevolucion = await DetalleDevolucion.find({ devolucionId: devolucion._id });
-    
-    if (accion === 'aprobar') {
-      // Actualizar el estado de todos los detalles a "Aprobado"
-      for (const detalle of detallesDevolucion) {
-        detalle.estado = 'Aprobado';
-        await detalle.save();
-      }
-      
-      // Identificar qué productos se devolvieron
-      const productosDevueltos = detallesDevolucion.map(detalle => ({
-        productoId: detalle.productoId.toString(),
-        cantidad: detalle.cantidad
-      }));
-      
-      // Identificar qué productos quedan (no se devolvieron o se devolvieron parcialmente)
-      const productosRestantes = [];
-      
-      for (const productoOriginal of ventaOriginal.productos) {
-        const productoDevuelto = productosDevueltos.find(
-          p => p.productoId === productoOriginal.productoId.toString()
-        );
-        
-        // Si el producto no se devolvió o se devolvieron algunos
-        if (!productoDevuelto || productoDevuelto.cantidad < productoOriginal.cantidad) {
-          const cantidadRestante = productoDevuelto 
-            ? productoOriginal.cantidad - productoDevuelto.cantidad 
-            : productoOriginal.cantidad;
-            
-          if (cantidadRestante > 0) {
-            productosRestantes.push({
-              productoId: productoOriginal.productoId,
-              cantidad: cantidadRestante,
-              precio: productoOriginal.precio
-            });
-          }
+
+    // Verificar que la venta no esté ya cancelada
+    if (ventaOriginal.estado === "cancelado") {
+      return res.status(400).json({
+        success: false,
+        message: "No se puede procesar devolución de una venta cancelada",
+      })
+    }
+
+    // Validar productos a devolver
+    const validacionProductos = validarProductosBasico(ventaOriginal.productos, productosDevueltos)
+
+    if (!validacionProductos.esValido) {
+      return res.status(400).json({
+        success: false,
+        message: validacionProductos.mensaje,
+      })
+    }
+
+    // Calcular total devuelto
+    const totalDevuelto = productosDevueltos.reduce((total, producto) => {
+      return total + producto.cantidad * producto.precio
+    }, 0)
+
+    // Crear la devolución
+    const nuevaDevolucion = new Devolucion({
+      ventaId,
+      fecha: new Date(),
+      totalDevuelto,
+      estado: "Pendiente",
+    })
+
+    const devolucionGuardada = await nuevaDevolucion.save()
+
+    // PROCESAR LA DEVOLUCIÓN USANDO EL SERVICIO
+    const resultadoProcesamiento = await DevolucionService.procesarDevolucion(
+      ventaOriginal,
+      productosDevueltos,
+      devolucionGuardada._id
+    )
+
+    // Actualizar estado de la devolución
+    devolucionGuardada.estado = "Aprobado"
+    await devolucionGuardada.save()
+
+    // Crear detalles de devolución usando los nombres de campos correctos del esquema
+    const detallesDevolucion = productosDevueltos.map((producto) => ({
+      devolucionId: devolucionGuardada._id, // Usar devolucionId como está en el esquema
+      productoId: producto.productoId, // Usar productoId como está en el esquema
+      nombreProducto: producto.nombre, // Usar nombreProducto como está en el esquema
+      cantidad: producto.cantidad,
+      precio: producto.precio, // Usar precio como está en el esquema
+      subtotal: producto.cantidad * producto.precio,
+      motivo: producto.motivo || motivo || "No especificado",
+      estado: "Aprobado",
+    }))
+
+    await DetalleDevolucion.insertMany(detallesDevolucion)
+
+    res.status(201).json({
+      success: true,
+      message: "Devolución procesada exitosamente",
+      devolucion: devolucionGuardada,
+      detalles: detallesDevolucion,
+      ventaCancelada: resultadoProcesamiento.ventaCancelada,
+      nuevaVenta: resultadoProcesamiento.nuevaVenta,
+      stockActualizado: resultadoProcesamiento.stockActualizado,
+    })
+  } catch (error) {
+    console.error("Error al procesar devolución completa:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error interno del servidor al procesar devolución",
+      error: error.message,
+    })
+  }
+}
+
+// Función de validación básica sin dependencias externas
+function validarProductosBasico(productosVenta, productosDevueltos) {
+  try {
+    for (const productoDevuelto of productosDevueltos) {
+      // Buscar el producto en la venta original
+      const productoEnVenta = productosVenta.find(
+        (p) => p.productoId.toString() === productoDevuelto.productoId.toString(),
+      )
+
+      if (!productoEnVenta) {
+        return {
+          esValido: false,
+          mensaje: `El producto ${productoDevuelto.nombre} no está en la venta original`,
         }
       }
-      
-      // Si quedan productos, crear una nueva venta
-      if (productosRestantes.length > 0) {
-        // Calcular el total de la nueva venta
-        const totalNuevaVenta = productosRestantes.reduce(
-          (sum, prod) => sum + (prod.cantidad * prod.precio), 0
-        );
-        
-        // Crear la nueva venta con los productos restantes
-        const nuevaVenta = new Venta({
-          cliente: ventaOriginal.cliente,
-          estado: 'Procesando',
-          fecha: new Date(),
-          direccion: ventaOriginal.direccion,
-          ciudad: ventaOriginal.ciudad,
-          total: totalNuevaVenta,
-          productos: productosRestantes
-        });
-        
-        await nuevaVenta.save();
-        
-        res.status(200).json({
-          success: true,
-          message: 'Devolución aprobada. Se ha creado una nueva venta.',
-          devolucion,
-          nuevaVenta
-        });
-      } else {
-        // Si no quedan productos (todos fueron devueltos)
-        res.status(200).json({
-          success: true,
-          message: 'Devolución aprobada. Todos los productos fueron devueltos.',
-          devolucion
-        });
-      }
-    } else {
-      // Si se rechaza la devolución
-      // Actualizar el estado de todos los detalles a "Rechazado"
-      for (const detalle of detallesDevolucion) {
-        detalle.estado = 'Rechazado';
-        await detalle.save();
-      }
-      
-      res.status(200).json({
-        success: true,
-        message: 'Devolución rechazada',
-        devolucion
-      });
-    }
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      message: 'Error al procesar la devolución', 
-      error: error.message 
-    });
-  }
-};
 
-// Eliminar una Devolución por ID (Delete)
+      // Verificar que no se devuelva más cantidad de la comprada
+      if (productoDevuelto.cantidad > productoEnVenta.cantidad) {
+        return {
+          esValido: false,
+          mensaje: `No se puede devolver más cantidad de ${productoDevuelto.nombre} de la que se compró`,
+        }
+      }
+
+      // Verificar que la cantidad sea positiva
+      if (productoDevuelto.cantidad <= 0) {
+        return {
+          esValido: false,
+          mensaje: `La cantidad a devolver de ${productoDevuelto.nombre} debe ser mayor a 0`,
+        }
+      }
+    }
+
+    return { esValido: true }
+  } catch (error) {
+    console.error("Error en validación de productos:", error)
+    return {
+      esValido: false,
+      mensaje: "Error interno en la validación de productos",
+    }
+  }
+}
+
+// Función básica para procesar devolución sin servicios externos
+const procesarDevolucionBasica = async (req, res) => {
+  try {
+    const { ventaId, productosDevueltos, motivo } = req.body
+
+    // Verificar que la venta existe
+    const ventaOriginal = await Venta.findById(ventaId)
+    if (!ventaOriginal) {
+      return res.status(404).json({
+        success: false,
+        message: "Venta no encontrada",
+      })
+    }
+
+    // Calcular total devuelto
+    const totalDevuelto = productosDevueltos.reduce((total, producto) => {
+      return total + producto.cantidad * producto.precio
+    }, 0)
+
+    // Crear la devolución
+    const nuevaDevolucion = new Devolucion({
+      ventaId,
+      fecha: new Date(),
+      totalDevuelto,
+      estado: "Pendiente",
+    })
+
+    const devolucionGuardada = await nuevaDevolucion.save()
+
+    // Solo cancelar la venta (lógica básica)
+    await Venta.findByIdAndUpdate(ventaId, { estado: "cancelado" })
+
+    res.status(201).json({
+      success: true,
+      message: "Devolución procesada exitosamente (modo básico)",
+      devolucion: devolucionGuardada,
+      ventaCancelada: { _id: ventaId, estado: "cancelado" },
+      nota: "Procesado en modo básico - solo se canceló la venta original",
+    })
+  } catch (error) {
+    console.error("Error al procesar devolución básica:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error al procesar devolución",
+      error: error.message,
+    })
+  }
+}
+
+// Obtener todas las devoluciones con paginación y filtros
+const obtenerDevoluciones = async (req, res) => {
+  try {
+    const { page = 1, limit = 10, searchTerm = "" } = req.query
+    const skip = (page - 1) * limit
+
+    // Construir filtro de búsqueda
+    const filtro = {}
+    if (searchTerm) {
+      // Si searchTerm es un ObjectId válido, buscar por ventaId
+      if (searchTerm.match(/^[0-9a-fA-F]{24}$/)) {
+        filtro.ventaId = searchTerm
+      }
+    }
+
+    // Obtener devoluciones con paginación
+    const devoluciones = await Devolucion.find(filtro)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(Number.parseInt(limit))
+      .populate("ventaId", "cliente fecha total")
+
+    // Contar total de documentos para paginación
+    const total = await Devolucion.countDocuments(filtro)
+
+    res.status(200).json({
+      success: true,
+      returns: devoluciones,
+      devoluciones: devoluciones,
+      total,
+      totalPages: Math.ceil(total / limit),
+      currentPage: Number.parseInt(page),
+    })
+  } catch (error) {
+    console.error("Error al obtener devoluciones:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener las devoluciones",
+      error: error.message,
+    })
+  }
+}
+
+// Obtener una devolución por ID
+const obtenerDevolucionPorId = async (req, res) => {
+  try {
+    const devolucion = await Devolucion.findById(req.params.id).populate("ventaId", "cliente fecha total")
+
+    if (!devolucion) {
+      return res.status(404).json({
+        success: false,
+        message: "Devolución no encontrada",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      data: devolucion,
+      devolucion: devolucion,
+    })
+  } catch (error) {
+    console.error(`Error al obtener devolución con ID ${req.params.id}:`, error)
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener la devolución",
+      error: error.message,
+    })
+  }
+}
+
+// Obtener devoluciones por venta
+const obtenerDevolucionesPorVenta = async (req, res) => {
+  try {
+    const { ventaId } = req.params
+
+    const devoluciones = await Devolucion.find({ ventaId }).sort({ fecha: -1 })
+
+    res.status(200).json({
+      success: true,
+      devoluciones,
+    })
+  } catch (error) {
+    console.error("Error al obtener devoluciones por venta:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error al obtener devoluciones de la venta",
+      error: error.message,
+    })
+  }
+}
+
+// Actualizar una devolución
+const actualizarDevolucion = async (req, res) => {
+  try {
+    const { estado } = req.body
+
+    const devolucion = await Devolucion.findByIdAndUpdate(req.params.id, { estado }, { new: true, runValidators: true })
+
+    if (!devolucion) {
+      return res.status(404).json({
+        success: false,
+        message: "Devolución no encontrada",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Devolución actualizada exitosamente",
+      data: devolucion,
+      devolucion: devolucion,
+    })
+  } catch (error) {
+    console.error(`Error al actualizar devolución con ID ${req.params.id}:`, error)
+    res.status(500).json({
+      success: false,
+      message: "Error al actualizar la devolución",
+      error: error.message,
+    })
+  }
+}
+
+// Actualizar estado de devolución
+const actualizarEstadoDevolucion = async (req, res) => {
+  try {
+    const { id } = req.params
+    const { estado } = req.body
+
+    if (!["Pendiente", "Aprobado", "Rechazado"].includes(estado)) {
+      return res.status(400).json({
+        success: false,
+        message: "Estado no válido",
+      })
+    }
+
+    const devolucion = await Devolucion.findByIdAndUpdate(id, { estado }, { new: true, runValidators: true })
+
+    if (!devolucion) {
+      return res.status(404).json({
+        success: false,
+        message: "Devolución no encontrada",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Estado de devolución actualizado",
+      devolucion,
+    })
+  } catch (error) {
+    console.error("Error al actualizar estado de devolución:", error)
+    res.status(500).json({
+      success: false,
+      message: "Error al actualizar estado de devolución",
+      error: error.message,
+    })
+  }
+}
+
+// Eliminar una devolución
 const eliminarDevolucion = async (req, res) => {
   try {
-    // Primero eliminar todos los detalles asociados
-    await DetalleDevolucion.deleteMany({ devolucionId: req.params.id });
-    
-    // Luego eliminar la devolución
-    const devolucion = await Devolucion.findByIdAndDelete(req.params.id);
-    
-    if (!devolucion) {
-      return res.status(404).json({ message: 'Devolución no encontrada' });
-    }
-    
-    res.status(200).json({ message: 'Devolución y sus detalles eliminados' });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
+    // Eliminar los detalles asociados usando el campo correcto del esquema
+    await DetalleDevolucion.deleteMany({ devolucionId: req.params.id }) // Usar devolucionId como está en el esquema
 
+    // Luego eliminar la devolución
+    const devolucion = await Devolucion.findByIdAndDelete(req.params.id)
+
+    if (!devolucion) {
+      return res.status(404).json({
+        success: false,
+        message: "Devolución no encontrada",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Devolución eliminada exitosamente",
+    })
+  } catch (error) {
+    console.error(`Error al eliminar devolución con ID ${req.params.id}:`, error)
+    res.status(500).json({
+      success: false,
+      message: "Error al eliminar la devolución",
+      error: error.message,
+    })
+  }
+}
+
+// EXPORTAR TODAS LAS FUNCIONES
 module.exports = {
   crearDevolucion,
+  procesarDevolucionCompleta,
+  procesarDevolucionBasica,
   obtenerDevoluciones,
   obtenerDevolucionPorId,
-  procesarDevolucion,
+  obtenerDevolucionesPorVenta,
+  actualizarDevolucion,
+  actualizarEstadoDevolucion,
   eliminarDevolucion,
-};
+}

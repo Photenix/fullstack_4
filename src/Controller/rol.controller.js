@@ -41,12 +41,14 @@ const getPermissions = async ( req, res ) => {
 const createRol = async ( req, res ) => {
     const { name, permissions } = req.body
     try{
-        if( !name || !permissions ) return res.status(400).json({message:"NO se pudo crear rol", success: false})
+        if( !name || name == '' || !permissions ) return res.status(400).json({message:"NO se pudo crear rol", success: false})
         const role = new Roles({ name, permissions });
         await role.save();
-        return res.status(200).json({ message: 'Rol creado correctamente', data: role, success: true });
+        return res.status(201).json({ message: 'Rol creado correctamente', data: role, success: true });
     }
     catch(e){
+        console.log( e );
+        
         return res.status(404).json({ message: 'Error al crear el rol', error: e.message, success: false });
     }
 }

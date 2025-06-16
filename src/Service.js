@@ -17,6 +17,7 @@ class Service {
         // this.viewEngine()
         this.app.use(express.static( path.join( dir, "static" )))
         this.routes()
+        this.dir = dir
     }
 
     start() {
@@ -70,6 +71,9 @@ class Service {
     routes() {
         this.app.use("/api", mainRoutes)
         this.app.use("/api/auth", authRoutes)
+        this.app.get('*', (req, res) => {
+            res.sendFile(path.join(this.dir, 'static', 'index.html'));
+        });
     }
 
 }

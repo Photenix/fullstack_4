@@ -1,4 +1,4 @@
-// Models/detalleVentaModel.js (actualizado)
+// Models/detalleVentaModel.js (limpio sin referencias a descuentos)
 const mongoose = require('mongoose');
 
 const DetalleVentaSchema = new mongoose.Schema({
@@ -12,21 +12,8 @@ const DetalleVentaSchema = new mongoose.Schema({
   },
   nombreProducto: String,
   cantidad: Number,
-  precio: Number,
-  descuento: {
-    type: Number,
-    default: 0
-  },
-  descuentoAplicado: {
-    type: Number,
-    default: 0
-  },
-  precioFinal: Number,
-  descuentoPreconfiguradoId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Descuento',
-    default: null
-  }
+  precio: Number
+ 
 });
 
 const DetalleVenta = mongoose.model('DetalleVenta', DetalleVentaSchema);

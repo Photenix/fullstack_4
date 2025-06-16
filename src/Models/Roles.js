@@ -41,7 +41,7 @@ const permissionsSchema = new Schema({
 },{ _id: false })
 
 const rolesSchema = new Schema({
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true, unique: true, length: { min: 2, max: 20 }, description: 'The name of the role' },
     state: { type: Boolean, required: true, default: true },
     permissions : {
         type : permissionsSchema ,

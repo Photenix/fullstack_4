@@ -98,11 +98,11 @@ const deleteSupplier = async (req, res) => {
         // find supplier by id and if is relation with a purchase don't delete
         const purchase = await Purchase.findOne({ supplierId: req.params.id });
         if (purchase) {
-            return res.status(400).json({ message: 'Cannot delete supplier with related purchases', success: false });
+            return res.status(400).json({ message: 'No se puede eliminar un proveedor asociado a una compra', success: false });
         }
         const supplier = await Supplier.findByIdAndDelete(req.params.id);
         if (!supplier) {
-            return res.status(404).json({ message: 'Supplier not found', success: false });
+            return res.status(404).json({ message: 'Proveedor no encontrado', success: false });
         }
         return res.status(200).json({ message: 'El proveedor ha sido eliminado', success: true })
     } catch (error) {

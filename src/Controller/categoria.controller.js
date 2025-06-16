@@ -25,11 +25,12 @@ const getCategoriaById = async (req, res) => {
 
 // Crear una nueva categoría
 const createCategoria = async (req, res) => {
-  const { nombre, subCategorias } = req.body;
+  const { nombre, subCategorias, activo } = req.body;
   try {
     const nuevaCategoria = new Categoria({
       nombre,
-      subCategorias,
+      subCategorias: subCategorias || [],
+      activo: activo !== undefined ? activo : true // Valor predeterminado: true
     });
     await nuevaCategoria.save();
     res.status(201).json(nuevaCategoria);
@@ -72,12 +73,15 @@ const addSubcategoria = async (req, res) => {
       return res.status(404).json({ message: 'Categoría no encontrada' });
     }
 
-    const { nombre } = req.body; // Asegúrate de que estás desestructurando 'nombre' correctamente
+    const { nombre, activo } = req.body;
     if (!nombre) {
       return res.status(400).json({ message: 'El nombre de la subcategoría es requerido' });
     }
 
-    const nuevaSubcategoria = { nombre };
+    const nuevaSubcategoria = { 
+      nombre, 
+      activo: activo !== undefined ? activo : true // Valor predeterminado: true
+    };
     await categoria.addSubcategoria(nuevaSubcategoria); // Agregar subcategoría
     res.status(200).json(categoria); // Retorna la categoría actualizada
   } catch (error) {
@@ -85,32 +89,35 @@ const addSubcategoria = async (req, res) => {
   }
 };
 
-
-
 // Actualizar subcategoría
 const updateSubcategoria = async (req, res) => {
   try {
-      const categoria = await Categoria.findById(req.params.id);
-      if (!categoria) {
-          return res.status(404).json({ message: 'Categoría no encontrada' });
-      }
-      const { subId } = req.params;
-      const { nombre } = req.body; // Cambiado aquí
+    const categoria = await Categoria.findById(req.params.id);
+    if (!categoria) {
+      return res.status(404).json({ message: 'Categoría no encontrada' });
+    }
+    const { subId } = req.params;
+    const { nombre, activo } = req.body;
 
-      const subCategoriaIndex = categoria.subCategorias.findIndex(sub => sub._id.toString() === subId);
-      if (subCategoriaIndex === -1) {
-          return res.status(404).json({ message: 'Subcategoría no encontrada' });
-      }
+    const subCategoriaIndex = categoria.subCategorias.findIndex(sub => sub._id.toString() === subId);
+    if (subCategoriaIndex === -1) {
+      return res.status(404).json({ message: 'Subcategoría no encontrada' });
+    }
 
-      // Actualiza el nombre de la subcategoría
-      categoria.subCategorias[subCategoriaIndex].nombre = nombre; // Cambiado aquí
-      await categoria.save();
-      res.status(200).json(categoria);
+    // Actualiza el nombre y estado de la subcategoría
+    if (nombre !== undefined) {
+      categoria.subCategorias[subCategoriaIndex].nombre = nombre;
+    }
+    if (activo !== undefined) {
+      categoria.subCategorias[subCategoriaIndex].activo = activo;
+    }
+    
+    await categoria.save();
+    res.status(200).json(categoria);
   } catch (error) {
-      res.status(500).json({ message: 'Error al actualizar la subcategoría', error });
+    res.status(500).json({ message: 'Error al actualizar la subcategoría', error });
   }
 };
-
 
 // Eliminar subcategoría
 const deleteSubcategoria = async (req, res) => {
@@ -128,6 +135,79 @@ const deleteSubcategoria = async (req, res) => {
   }
 };
 
+// Cambiar estado de una categoría
+const toggleCategoryState = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { activo } = req.body;
+    
+    if (activo === undefined) {
+      return res.status(400).json({ message: 'El estado activo es requerido' });
+    }
+    
+    const categoria = await Categoria.findById(id);
+    if (!categoria) {
+      return res.status(404).json({ message: 'Categoría no encontrada' });
+    }
+    
+    categoria.activo = activo;
+    
+    // Si estamos desactivando la categoría, también desactivamos todas las subcategorías
+    if (activo === false && Array.isArray(categoria.subCategorias)) {
+      categoria.subCategorias.forEach(sub => {
+        sub.activo = false;
+      });
+    }
+    
+    await categoria.save();
+    res.status(200).json(categoria);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al cambiar el estado de la categoría', error });
+  }
+};
 
+// Cambiar estado de una subcategoría
+const toggleSubcategoryState = async (req, res) => {
+  try {
+    const { id, subId } = req.params;
+    const { activo } = req.body;
+    
+    if (activo === undefined) {
+      return res.status(400).json({ message: 'El estado activo es requerido' });
+    }
+    
+    const categoria = await Categoria.findById(id);
+    if (!categoria) {
+      return res.status(404).json({ message: 'Categoría no encontrada' });
+    }
+    
+    const subCategoriaIndex = categoria.subCategorias.findIndex(sub => sub._id.toString() === subId);
+    if (subCategoriaIndex === -1) {
+      return res.status(404).json({ message: 'Subcategoría no encontrada' });
+    }
+    
+    // Si estamos activando una subcategoría, aseguramos que la categoría esté activa
+    if (activo === true && categoria.activo === false) {
+      categoria.activo = true;
+    }
+    
+    categoria.subCategorias[subCategoriaIndex].activo = activo;
+    await categoria.save();
+    res.status(200).json(categoria);
+  } catch (error) {
+    res.status(500).json({ message: 'Error al cambiar el estado de la subcategoría', error });
+  }
+};
 
-export { getCategorias, getCategoriaById, createCategoria, updateCategoria, deleteCategoria, addSubcategoria, updateSubcategoria, deleteSubcategoria };
+export { 
+  getCategorias, 
+  getCategoriaById, 
+  createCategoria, 
+  updateCategoria, 
+  deleteCategoria, 
+  addSubcategoria, 
+  updateSubcategoria, 
+  deleteSubcategoria,
+  toggleCategoryState,
+  toggleSubcategoryState
+};

@@ -2,6 +2,7 @@ import Products from "../Models/Products";
 import validateInformationField from "../Tools/creation.tool";
 import { v2 as cloudinary } from 'cloudinary';
 import { getCategories } from "../Tools/product.tool";
+import Purchase from "../Models/compra";
 
 const PRODUCT_VALUES = [
     "name", "totalQuantity",
@@ -145,7 +146,7 @@ const createProductImage = async ( req, res ) => {
             upload_preset: 'ml_default',
             folder: 'Boutique'
         });
-        // console.log(uploadResponse);
+        console.log(uploadResponse);
         return res.status(200).json({ msg: 'created image', img: uploadResponse.url });
     } catch (err) {
         console.error(err);
@@ -177,13 +178,37 @@ const updateProduct = async ( req, res ) => {
     }
 }
 
+const updateProductDetail = async ( req, res ) => {
+    try{
+        const { id } = req.params;
+        const { changes } = req.body;
+        // new true para que me devuelva el producto actualizado
+        const product = await Products.findOneAndUpdate({ details: { $elemMatch: { _id: id } } }, { $set: changes }, { new: true });
+
+        return res.status(200).json({ message: 'Detalle de producto actualizado correctamente', data: product, success: true });
+    }
+    catch(e){
+        return res.status(500).json({ message: 'Error al actualizar el producto', error: e.message, success: false });
+    }
+}
+
+
 
 const deleteProduct = async ( req, res ) => {
     try{
         const { id } = req.params;
+        // const product = await Products.findById(id).lean();
+        // const detailsId = product.details.map( detail => detail._id )
+        //check if not exist id details on purchase        
+        const purchase = await Purchase.findOne({ "products.productId":  id  })
+
+        if( purchase ){
+            return res.status(400).json({ message: 'No se puede eliminar el producto porque está asociado a una compra', success: false });
+        }
+        
+        
         const product = await Products.findByIdAndDelete(id);
         res.json({ message: 'Producto eliminado correctamente', data: product, success: true });
-        // const product = await Products.findById(id);
         // res.json({ message: 'Producto eliminado correctamente', data: product, success: true });
     }
     catch(e){
@@ -208,6 +233,33 @@ const deleteDetailProduct = async ( req, res ) => {
     }
 }
 
+const deleteProductImage = async (req, res) => {
+    try {
+        // Obtener el public_id de la imagen a eliminar
+        // Puedes recibirlo en el body, params o query según tu preferencia
+        const { id } = req.body;
+        
+        if (!id) return res.status(400).json({ message: 'Public ID is required', success: false });
+
+        // Eliminar la imagen de Cloudinary
+        const deleteResponse = await cloudinary.uploader.destroy( id );
+
+        // Verificar si la eliminación fue exitosa
+        if (deleteResponse.result === 'ok') {
+            return res.status(200).json({ message: 'Imagen fue eliminada con exito', success: true });
+        } else {
+            console.log( deleteResponse );
+            
+            return res.status(400).json({ message: 'No se pudo eliminar la imagen', success: false });
+        }
+    } catch (err) {
+        console.error(err);
+        return res.status(500).json({ message: 'Something went wrong', success: false });
+    }
+}
+
+
+
 export { 
     getProductQuantity, getProducts, getProductById, searchProducts, createManyProducts,
-    createProduct, createProductImage, updateProduct, deleteProduct, deleteDetailProduct }
+    createProduct, createProductImage, updateProduct, updateProductDetail, deleteProduct, deleteDetailProduct, deleteProductImage }
