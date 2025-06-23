@@ -3,7 +3,16 @@ import Product from "../Models/Products.js"
 
 const getPurchases = async (req, res) => {
   try {
-    const purchases = await Purchase.find().populate("supplierId").populate("products.productId").sort({ createdAt: -1 })
+    const limit = req.query.limit || 100 // I put 100 if maybe don't used the funcionality
+    const page = req.query.page || 1
+    const offset = (page - 1)  * limit
+
+    const purchases = await Purchase.find()
+      .populate("supplierId")
+      .populate("products.productId")
+      .sort({ createdAt: -1 })
+      .skip(offset)
+      .limit(limit)
     res.json(purchases)
   } catch (error) {
     res.status(500).json({ message: error.message })
@@ -29,15 +38,15 @@ export const cancelPurchase = async (req, res) => {
     // Buscar la compra por ID
     const purchase = await Purchase.findById(req.params.id)
     if (!purchase) {
-      console.log("❌ Compra no encontrada")
+      // console.log("❌ Compra no encontrada")
       return res.status(404).json({ message: "Compra no encontrada", success: false })
     }
 
-    console.log("✅ Compra encontrada:", purchase.invoiceNumber)
+    // console.log("✅ Compra encontrada:", purchase.invoiceNumber)
 
     // Verificar si ya está cancelada
     if (purchase.status === "Canceled") {
-      console.log("❌ La compra ya está cancelada")
+      // console.log("❌ La compra ya está cancelada")
       return res.status(400).json({ message: "La compra ya está cancelada", success: false })
     }
 

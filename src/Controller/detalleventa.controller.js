@@ -1,4 +1,4 @@
-const DetalleVenta = require("../Models/detalleVentaModel")
+const DetalleVenta = require("../Models/detalleVentaModel.js")
 // CORREGIDO: Importar el modelo Product correctamente
 import Product from "../Models/Products.js"
 

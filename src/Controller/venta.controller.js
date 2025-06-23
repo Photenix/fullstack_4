@@ -93,9 +93,9 @@ const crearVenta = async (req, res) => {
       employee: employeeId
     })
 
-    console.log("Intentando guardar venta")
+    // console.log("Intentando guardar venta")
     const ventaGuardada = await nuevaVenta.save()
-    console.log("Venta guardada:", ventaGuardada._id)
+    // console.log("Venta guardada:", ventaGuardada._id)
 
     const detalles = productos.map((producto) => ({
       ventaId: nuevaVenta._id,
@@ -108,7 +108,7 @@ const crearVenta = async (req, res) => {
 
     await DetalleVenta.insertMany(detalles)
 
-    res.status(201).json({ success: true, message: "Venta creada exitosamente", venta: nuevaVenta, detalles })
+    res.status(201).json({ success: true, message: "Venta creada exitosamente", venta: ventaGuardada, detalles })
   } catch (error) {
     console.log("Error al crear venta:", error)
 
@@ -118,7 +118,15 @@ const crearVenta = async (req, res) => {
 
 const obtenerVentas = async (req, res) => {
   try {
-    const ventas = await Venta.find().sort({ fecha: -1 })
+    const limit = req.query.limit || 100 // I put 100 if maybe don't used the funcionality
+    const page = req.query.page || 1
+    const offset = (page - 1)  * limit
+    const ventas = await Venta.find()
+      .sort({ fecha: -1 })
+      .skip(offset)
+      .limit(limit)
+      .populate('cliente', 'firstName lastName')
+      .populate('employee', 'firstName lastName')
 
     res.status(200).json(ventas)
   } catch (error) {
@@ -128,7 +136,11 @@ const obtenerVentas = async (req, res) => {
 
 const obtenerVenta = async (req, res) => {
   try {
-    const venta = await Venta.findById(req.params.id).lean()
+    const venta = await Venta
+      .findById(req.params.id)
+      .populate('cliente', 'firstName lastName')
+      .populate('employee', 'firstName lastName')
+      .lean()
     if (!venta) {
       return res.status(404).json({ success: false, message: 'Venta no encontrada' });
     }
