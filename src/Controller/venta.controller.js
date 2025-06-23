@@ -7,7 +7,7 @@ import Product from "../Models/Products.js"
 // Crear una nueva Venta
 const crearVenta = async (req, res) => {
   try {
-    const employeeId = req?.user._id || null;
+    const employeeId = req?.user?._id || null;
     
     // Eliminar totalDescuento de la desestructuración
     const { cliente, productos, estado, fecha, direccion, ciudad, total } = req.body
