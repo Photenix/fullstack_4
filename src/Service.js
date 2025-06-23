@@ -55,8 +55,33 @@ class Service {
     settersApp() {
         // config cors, cookies and API key
         console.log( "Iniciando use");
+        const allowedOrigins =[
+            'http://localhost',
+            'https://boxnovan.onrender.com/'
+        ]
         this.app.use( cors({
-            origin: ['http://localhost:5173', '*', '0.0.0.0', "http://localhost:5174"],
+            origin: function (origin, callback) {
+                // Permitir todas las solicitudes de origen
+                if( !origin ){
+                    return callback(null, true);
+                }
+
+                let isAllowed = false;
+                for (let i = 0; i < allowedOrigins.length; i++) {
+                    if (origin.startsWith(allowedOrigins[i])) {
+                        isAllowed = true;
+                        break;
+                    }
+                }
+                if( isAllowed ) {
+                    return callback(null, true);
+                } else {
+                    console.log(`CORS error: ${origin} not allowed`);
+                    // return callback(new Error('Not allowed by CORS'))
+                    // no permitir el origen
+                    return callback(null, false);
+                }
+            },
             credentials: true
         }) )
         // this.app.use( cors() )
