@@ -3,6 +3,7 @@ const Venta = require("../Models/ventaModel")
 const DetalleVenta = require("../Models/detalleVentaModel")
 // CORREGIDO: Importar el modelo Product correctamente (ajusta la ruta según tu estructura)
 import Product from "../Models/Products.js"
+import { updateReturnProducts } from "../services/devolucionService.js";
 
 // Crear una nueva Venta
 const crearVenta = async (req, res) => {
@@ -170,6 +171,10 @@ const actualizarEstadoVenta = async (req, res) => {
       { estado: estadoLower }, // CORREGIDO: era { estadoLower }
       { new: true, runValidators: true },
     )
+
+    if( estadoLower == "cancelado"){
+      updateReturnProducts(venta.productos)
+    }
 
     if (!venta) {
       return res.status(404).json({ success: false, message: "Venta no encontrada" })

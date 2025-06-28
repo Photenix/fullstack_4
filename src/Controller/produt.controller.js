@@ -3,6 +3,7 @@ import validateInformationField from "../Tools/creation.tool";
 import { v2 as cloudinary } from 'cloudinary';
 import { getCategories } from "../Tools/product.tool";
 import Purchase from "../Models/compra";
+import Venta from "../Models/ventaModel";
 
 const PRODUCT_VALUES = [
     "name", "totalQuantity",
@@ -197,17 +198,21 @@ const updateProductDetail = async ( req, res ) => {
 const deleteProduct = async ( req, res ) => {
     try{
         const { id } = req.params;
-        // const product = await Products.findById(id).lean();
-        // const detailsId = product.details.map( detail => detail._id )
+        const InfoProduct = await Products.findById(id).lean();
+        const detailsId = InfoProduct.details.map( detail => detail._id )
+        
         //check if not exist id details on purchase        
         const purchase = await Purchase.findOne({ "products.productId":  id  })
-
-        if( purchase ){
-            return res.status(400).json({ message: 'No se puede eliminar el producto porque está asociado a una compra', success: false });
+        const sell = await Venta.findOne({
+            "productos.productoId": { $in: detailsId }
+        })
+        
+        if( purchase || sell ){
+            return res.status(400).json({ message: 'No se puede eliminar el producto porque está asociado a una compra/venta', success: false });
         }
         
-        
         const product = await Products.findByIdAndDelete(id);
+        
         res.json({ message: 'Producto eliminado correctamente', data: product, success: true });
         // res.json({ message: 'Producto eliminado correctamente', data: product, success: true });
     }

@@ -97,7 +97,8 @@ const procesarDevolucionCompleta = async (req, res) => {
 
     // Calcular total devuelto
     const totalDevuelto = productosDevueltos.reduce((total, producto) => {
-      return total + producto.cantidad * producto.precio
+      let gD = ventaOriginal?.generalDiscount || 0
+      return (total + producto.cantidad * producto.precio) * ( (100 - gD) / 100)
     }, 0)
 
     // Crear la devolución
@@ -110,7 +111,7 @@ const procesarDevolucionCompleta = async (req, res) => {
 
     const devolucionGuardada = await nuevaDevolucion.save()
 
-    // PROCESAR LA DEVOLUCIÓN USANDO EL SERVICIO
+    // Proceso de crear venta y cambiar stock
     const resultadoProcesamiento = await DevolucionService.procesarDevolucion(
       ventaOriginal,
       productosDevueltos,
@@ -293,6 +294,7 @@ const obtenerDevoluciones = async (req, res) => {
 const obtenerDevolucionPorId = async (req, res) => {
   try {
     const devolucion = await Devolucion.findById(req.params.id).populate("ventaId", "cliente fecha total")
+    const detalleDevolucion = await DetalleDevolucion.find({ devolucionId: devolucion._id })
 
     if (!devolucion) {
       return res.status(404).json({
@@ -303,8 +305,10 @@ const obtenerDevolucionPorId = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      data: devolucion,
-      devolucion: devolucion,
+      data: {
+        devolucion,
+        detalleDevolucion,
+      },
     })
   } catch (error) {
     console.error(`Error al obtener devolución con ID ${req.params.id}:`, error)

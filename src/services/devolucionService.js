@@ -4,6 +4,7 @@ const Venta = require('../Models/ventaModel');
 const Product = require('../Models/Products');
 const DetalleVenta = require('../Models/detalleVentaModel');
 const { default: Products } = require('../Models/Products');
+const { updateProductDetail } = require('../Tools/product.tool');
 
 /**
  * Procesa una devolución completa:
@@ -18,14 +19,6 @@ const { default: Products } = require('../Models/Products');
  */
 const procesarDevolucion = async (ventaOriginal, productosDevueltos, devolucionId) => {
   try {
-    // console.log('Iniciando procesamiento de devolución...');
-    // console.log('Venta original:', ventaOriginal._id);
-    // console.log('Productos a devolver:', productosDevueltos.length);
-
-    
-
-    // console.log('Venta cancelada correctamente');
-
     // 2. Identificar productos que NO fueron devueltos (para la nueva venta)
     let productosNoDevueltos = identificarProductosNoDevueltos(
       ventaOriginal.productos,
@@ -36,19 +29,13 @@ const procesarDevolucion = async (ventaOriginal, productosDevueltos, devolucionI
     // 3. Crear nueva venta solo si hay productos no devueltos
     let nuevaVenta = null;
     if (productosNoDevueltos.length > 0) {
-      // console.log("---------------");
-      // console.log( productosNoDevueltos );
-      
-      // console.log("---------------");
-      
       nuevaVenta = await crearNuevaVenta(ventaOriginal, productosNoDevueltos);
-      // console.log('Nueva venta creada:', nuevaVenta._id);
     } else {
       // console.log('No hay productos para crear nueva venta');
     }
 
     // 4. Actualizar stock de productos devueltos
-    const stockActualizado = await actualizarStockProductosDevueltos(productosDevueltos);
+    const stockActualizado = await updateReturnProducts(productosDevueltos);
     // console.log('Stock actualizado para', stockActualizado.length, 'productos');
 
 
@@ -119,14 +106,6 @@ const identificarProductosNoDevueltos = (productosOriginales, productosDevueltos
  */
 const crearNuevaVenta = async (ventaOriginal, productosNoDevueltos) => {
   try {
-
-    // console.log("__________________________________________________");
-    // console.log("__________________________________________________");
-    // console.log( ventaOriginal )
-    // console.log("__________________________________________________");
-    // console.log("__________________________________________________");
-    
-
     // Calcular el nuevo total basado en los productos no devueltos
     const nuevoTotal = productosNoDevueltos.reduce(
       (total, producto) => total + (producto.precio * producto.cantidad),
@@ -178,7 +157,7 @@ const crearNuevaVenta = async (ventaOriginal, productosNoDevueltos) => {
  * @param {Array} productosDevueltos - Productos a devolver
  * @returns {Array} Resultado de las actualizaciones
  */
-const actualizarStockProductosDevueltos = async (productosDevueltos) => {
+const updateReturnProducts = async (productosDevueltos) => {
   try {
     const resultados = [];
     
@@ -186,7 +165,7 @@ const actualizarStockProductosDevueltos = async (productosDevueltos) => {
     for (const productoDevuelto of productosDevueltos) {
       try {
         // 1. Buscar el producto y sus detalles
-        const producto = await Products.findById(productoDevuelto.productoId);
+        const producto = await Products.findOne({ "details._id": productoDevuelto.productoId });
         if (!producto) {
           console.warn(`Producto no encontrado: ${productoDevuelto.productoId}`);
           resultados.push({
@@ -209,21 +188,25 @@ const actualizarStockProductosDevueltos = async (productosDevueltos) => {
           });
           continue;
         }
-        
-        // Obtener el primer detalle (o buscar por tamaño si está disponible)
-        const detalle = producto.details[0];
-        
+
+        const detalle = producto.details.filter( detail => detail._id.equals(productoDevuelto.productoId) )[0];
+
         // 3. Actualizar la cantidad en el detalle
         const nuevaCantidad = detalle.quantity + productoDevuelto.cantidad;
         
         // 4. Actualizar el detalle del producto
-        const updateData = {
-          ...detalle.toObject(),
-          quantity: nuevaCantidad
-        };
+        // const updateData = {
+        //   ...detalle.toObject(),
+        //   quantity: nuevaCantidad
+        // };
         
-        // Usar la función updateProductDetail para actualizar el detalle
-        const productoActualizado = await updateProductDetail(detalle._id, updateData);
+        // // Usar la función updateProductDetail para actualizar el detalle
+        // const productoActualizado = await updateProductDetail(detalle._id, updateData);
+
+        detalle.quantity = nuevaCantidad
+        delete detalle._id
+
+        const productoActualizado = await updateProductDetail( detalle._id, detalle );
         
         if (productoActualizado) {
           resultados.push({
@@ -258,31 +241,7 @@ const actualizarStockProductosDevueltos = async (productosDevueltos) => {
   }
 };
 
-/**
- * Actualiza un detalle específico de un producto
- * 
- * @param {String} idDetail - ID del detalle del producto
- * @param {Object} updateData - Datos a actualizar
- * @returns {Object} Producto actualizado o null
- */
-const updateProductDetail = async (idDetail, updateData) => {
-  try {
-    const product = await Product.findOneAndUpdate(
-      { "details._id": idDetail }, // Buscar el producto y el detalle
-      { $set: { "details.$": updateData } }, // Usar $set para actualizar el detalle
-      { new: true } // Devolver el documento actualizado
-    );
-    return product;
-  } catch (e) {
-    // console.log(e);
-    return null;
-  }
-};
-
 module.exports = {
   procesarDevolucion,
-  identificarProductosNoDevueltos,
-  crearNuevaVenta,
-  actualizarStockProductosDevueltos,
-  updateProductDetail
+  updateReturnProducts,
 };
