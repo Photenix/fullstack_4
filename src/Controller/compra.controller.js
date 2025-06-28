@@ -31,9 +31,9 @@ const getPurchaseById = async (req, res) => {
 
 export const cancelPurchase = async (req, res) => {
   try {
-    console.log("=== INICIO CANCELACIÓN DE COMPRA ===")
-    console.log("ID de compra:", req.params.id)
-    console.log("Datos recibidos del frontend:", req.body)
+    // console.log("=== INICIO CANCELACIÓN DE COMPRA ===")
+    // console.log("ID de compra:", req.params.id)
+    // console.log("Datos recibidos del frontend:", req.body)
 
     // Buscar la compra por ID
     const purchase = await Purchase.findById(req.params.id)
@@ -52,80 +52,46 @@ export const cancelPurchase = async (req, res) => {
 
     // Obtener el motivo de cancelación del cuerpo de la petición
     const { cancellationReason = "", restoreStock = true, isDecrease = true } = req.body
-    console.log("Motivo de cancelación:", cancellationReason)
-    console.log("Restaurar stock:", restoreStock)
-    console.log("Es decremento:", isDecrease)
+    // console.log("Motivo de cancelación:", cancellationReason)
+    // console.log("Restaurar stock:", restoreStock)
+    // console.log("Es decremento:", isDecrease)
 
     // Solo restaurar stock si restoreStock es true
     if (restoreStock) {
-      console.log("=== INICIANDO RESTAURACIÓN DE STOCK ===")
+      // console.log("=== INICIANDO RESTAURACIÓN DE STOCK ===")
 
       for (const item of purchase.products) {
-        console.log(`\n--- Procesando producto: ${item.productId} ---`)
-        console.log(`Cantidad a restaurar: ${item.quantity}`)
-        console.log(`Detail ID: ${item.detailId}`)
+        // console.log(`\n--- Procesando producto: ${item.productId} ---`)
+        // console.log(`Cantidad a restaurar: ${item.quantity}`)
+        // console.log(`Detail ID: ${item.detailId}`)
 
         try {
           // CORRECCIÓN: Al cancelar una compra, debemos DECREMENTAR el stock
           // porque queremos volver al estado anterior a la compra
           const stockChange = isDecrease ? -item.quantity : item.quantity
-          console.log(`Cambio de stock a aplicar: ${stockChange}`)
-
-          // Actualizar el stock total del producto (DECREMENTAR para restaurar)
-          const productUpdateResult = await Product.findByIdAndUpdate(
-            item.productId,
-            { $inc: { totalQuantity: stockChange } }, // NEGATIVO para decrementar
-            { new: true },
+          
+          const detailUpdateResult = await Product.updateOne(
+            { "details._id": item.detailId.toString() },
+            { $inc: { "details.$.quantity": stockChange } }, // NEGATIVO para decrementar
+            { new: true }
           )
 
-          console.log(
-            `✅ Stock total actualizado para producto ${item.productId}:`,
-            productUpdateResult ? productUpdateResult.totalQuantity : "Error",
-          )
-
-          // Si hay un detailId, actualizar también el detalle específico
-          if (item.detailId) {
-            console.log(`Actualizando detalle específico: ${item.detailId}`)
-
-            // Verificar el estado antes de la actualización
-            const productBefore = await Product.findOne({ "details._id": item.detailId.toString() }, { "details.$": 1 })
-
-            if (productBefore && productBefore.details && productBefore.details.length > 0) {
-              console.log(`Stock del detalle ANTES: ${productBefore.details[0].quantity}`)
-            }
-
-            // Actualizar directamente el detalle usando el operador $inc con valor NEGATIVO
-            const detailUpdateResult = await Product.updateOne(
-              { "details._id": item.detailId.toString() },
-              { $inc: { "details.$.quantity": stockChange } }, // NEGATIVO para decrementar
-            )
-
-            console.log(`Resultado de actualización del detalle:`, detailUpdateResult)
-
-            // Verificar el estado después de la actualización
-            const productAfter = await Product.findOne({ "details._id": item.detailId.toString() }, { "details.$": 1 })
-
-            if (productAfter && productAfter.details && productAfter.details.length > 0) {
-              console.log(`Stock del detalle DESPUÉS: ${productAfter.details[0].quantity}`)
-            }
-
-            if (detailUpdateResult.matchedCount === 0) {
-              console.log(`⚠️ No se encontró el detalle ${item.detailId} para actualizar`)
-            } else if (detailUpdateResult.modifiedCount === 0) {
-              console.log(`⚠️ El detalle ${item.detailId} no fue modificado`)
-            } else {
-              console.log(`✅ Detalle ${item.detailId} actualizado correctamente`)
-            }
-          } else {
-            console.log("ℹ️ No hay detailId para este producto")
-          }
         } catch (detailError) {
           console.error(`❌ Error al restaurar el stock del producto ${item.productId}:`, detailError)
           // Continuar con el siguiente producto en lugar de fallar completamente
         }
+        finally {
+          const product = await Product.findById(item.productId)
+          if (product) {
+            const countAll = product.details.reduce((acc, detail) => acc + detail.quantity, 0)
+            
+            product.totalQuantity = countAll
+            await product.save()
+          }
+        }
       }
 
-      console.log("=== RESTAURACIÓN DE STOCK COMPLETADA ===")
+      // console.log("=== RESTAURACIÓN DE STOCK COMPLETADA ===")
     } else {
       console.log("ℹ️ Saltando restauración de stock (restoreStock = false)")
     }

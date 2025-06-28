@@ -58,7 +58,7 @@ const rolWorker =  async () => {
             // Create a new admin role with all permissions
             const rol = await Roles.create({ name: 'Worker' , permissions: permissions }); 
             rol.save()
-            console.log("Successfully created admin");
+            console.log("Successfully created employee");
         }
         catch(error){ console.error('Error al crear rol Admin', error); }
     }
@@ -90,7 +90,7 @@ const rolClient = async() => {
             // Create a new admin role with all permissions
             const rol = await Roles.create({ name: 'Client' , permissions: permissions }); 
             rol.save()
-            console.log("Successfully created admin");
+            console.log("Successfully created client");
         }
         catch(error){ console.error('Error al crear rol Admin', error); }
     }

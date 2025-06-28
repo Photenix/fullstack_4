@@ -85,8 +85,8 @@ const getToken = async (req, res) => {
         // console.log( listPermissions );
 
         delete user.password
-
-        // const token = jwt.sign(user, SECRET_KEY, { expiresIn:'1h'})    
+        
+        // const token = jwt.sign(user, SECRET_KEY, { expiresIn:'1m'})
         const token = jwt.sign(user, SECRET_KEY, { expiresIn:'7d'})
 
         res.cookie('token', token,{
@@ -112,7 +112,11 @@ const confirmToken = async (req, res) => {
         // Decodificamos el token para obtener el payload (datos del usuario)
         jwt.verify(token, SECRET_KEY, (err, decoded) => {
             if (err) {
-                return res.status(401).json({ message: 'Token inválido', isAuthenticated:false });
+                res.clearCookie("token")
+                if( err.name === 'TokenExpiredError' ) {
+                    return res.status(401).json({ message: 'Token expirado', success: false });
+                }
+                return res.status(403).json({ message: 'Token inválido', success: false });
             }
             res.json({ message: 'Acceso permitido', user: decoded, isAuthenticated: true });
         });

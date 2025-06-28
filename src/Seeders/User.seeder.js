@@ -105,4 +105,34 @@ const workersUsers = async ( idRol ) => {
     console.log("Users workers created")
 }
 
-export { adminUser, workersUsers };
+const AnonClientUser = async ( idRol ) => {
+    const userA = await Users.findOne({email: "anon@anonim.or"})
+
+    console.log( "Creating clients" );
+    
+    if(userA === null){
+        const newUserA = await Users.create({
+            typeIdentifier: "CC",
+            username: "Anonimo",
+            password: "EstaContraseñanuncaseraEncontrada!#.123546489",
+            firstName: "Cliente",
+            lastName: "Anonimo",
+            documentNumber: "00000000000",
+            email: "anon@anonim.or",
+            birthdate: new Date("1999-10-17"),
+            gender: "M",
+            phone: "0000000000",
+            address: "Calle 456, 789, 1011",
+            country: "Colombia",
+            city: "Medellin",
+            state: true,
+            rol: idRol
+        })
+        await newUserA.save()
+        console.log("User A created")
+    }
+
+    console.log("Users client created")
+}
+
+export { adminUser, workersUsers, AnonClientUser };

@@ -11,7 +11,13 @@ const verify = (req, res, next) => {
     }
 
     jwt.verify(token, SECRET_KEY, (err, decoded) => {
-        if (err) return res.status(403).json({ message: 'Token inválido', success: false });
+        if (err) {
+            res.clearCookie("token")
+            if( err.name === 'TokenExpiredError' ) {
+                return res.status(401).json({ message: 'Token expirado', success: false });
+            }
+            return res.status(403).json({ message: 'Token inválido', success: false });
+        }
         req.user = decoded;
         next();
     });
