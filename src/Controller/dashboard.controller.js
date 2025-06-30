@@ -35,7 +35,9 @@ const getQuantitySell = async ( init = new Date(), end = new Date() ) => {
           fecha: {
             $gte: init,
             $lt: end
-          }
+          },
+          estado: {$nin: ['cancelado', 'pendiente']}
+          // estado: {$nin: ['cancelado']}
         }
       },
       {
@@ -173,7 +175,8 @@ const getSellMonth = async (year, month) => {
             $gte: startDate,
             $lt: endDate
           },
-          estado: { $nin: ['Cancelado'] } // Excluir ventas canceladas
+          // estado: { $nin: ['cancelado'] } // Excluir ventas canceladas
+          estado: { $nin: ['cancelado', 'pendiente'] } // Excluir ventas canceladas
         }
       },
       {
@@ -232,7 +235,8 @@ const getSellingByYear = async (year) => {
             $gte: new Date(`${year}-01-01`), // Fecha inicial del año
             $lt: new Date(`${year + 1}-01-01`) // Fecha inicial del siguiente año
           },
-          estado: { $nin: ['cancelado'] }
+          // estado: { $nin: ['cancelado'] }
+          estado: { $nin: ['cancelado', 'pendiente'] }
         }
       },
       {
@@ -283,7 +287,8 @@ const getSellAndPurchaseByYear = async (year) => {
             $gte: new Date(`${year}-01-01`), // Fecha de inicio del año
             $lt: new Date(`${year + 1}-01-01`) // Fecha de inicio del siguiente año
           },
-          estado: { $nin: ['cancelado'] } // Excluir ventas canceladas
+          // estado: { $nin: ['cancelado'] } // Excluir ventas canceladas
+          estado: { $nin: ['cancelado', 'pendiente'] } // Excluir ventas canceladas
         }
       },
       {
@@ -322,7 +327,8 @@ const getSellAndPurchaseByYear = async (year) => {
 async function getTopThreeProductsSell () {
   try {
     const topProducts = await Venta.aggregate([
-      { $match: { estado: { $nin: ['cancelado'] } } }, // Filtrar ventas no canceladas
+      // { $match: { estado: { $nin: ['cancelado'] } } }, // Filtrar ventas no canceladas
+      { $match: { estado: { $nin: ['cancelado', 'pendiente'] } } }, // Filtrar ventas no canceladas
       // Descomponer el array de productos
       { $unwind: '$productos' },
       // Agrupar por productoId y sumar las cantidades
@@ -350,7 +356,8 @@ async function getTopClientsSell() {
   try{
     const topClientes = await Venta.aggregate([{
         $match: {
-          estado: { $nin: ['cancelado'] } // Excluir ventas canceladas
+          estado: { $nin: ['cancelado', 'pendiente'] } // Excluir ventas canceladas
+          // estado: { $nin: ['cancelado'] } // Excluir ventas canceladas
         }
       },
       {
@@ -404,13 +411,19 @@ const getSellTypes = async ( req, res ) =>{
   try{
     // Para ventas web
     const totalWeb = await Venta.aggregate([
-      { $match: { isWeb: true } },
+      { $match: { 
+        isWeb: true,
+        estado: { $nin: ['cancelado', 'pendiente'] }
+      } },
       { $group: { _id: null, total: { $sum: "$total" } } }
     ]);
 
     // Para ventas en tienda
     const totalTienda = await Venta.aggregate([
-      { $match: { isWeb: false } },
+      { $match: { 
+        isWeb: false,
+        estado: { $nin: ['cancelado', 'pendiente'] }
+      } },
       { $group: { _id: null, total: { $sum: "$total" } } }
     ]);
 
@@ -495,7 +508,7 @@ const getDashboardSellAndPurchase = async ( req, res ) =>{
             $lt: fechaFin
           },
           estado: {
-            $nin: ['cancelado']
+            $nin: ['cancelado', 'pendiente']
           }
         },
       },

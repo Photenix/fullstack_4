@@ -20,6 +20,11 @@ import { getSellByUser } from "../Controller/venta.controller.js";
 
 const {
   crearVenta,
+  actualizarEstadoVenta,
+  obtenerVenta,
+  obtenerVentas,
+  obtenerVentasClienteId, // AGREGADO: función movida desde detalleVenta.controller.js
+  updateSale
 } = require("../Controller/venta.controller.js")
 
 const auth = Router()
@@ -114,7 +119,16 @@ auth.delete('/category/:id/subcategory/:subId', deleteSubcategoria); // Añadida
 // auth.post('/order/:id', sendReceipt);
 
 // VENTAS
+
+auth.get("/ventas", obtenerVentas)
+auth.get("/ventas/cliente/:clienteId", obtenerVentasClienteId) // CORREGIDO: ahora viene de venta.controller.js
+auth.get("/ventas/:id", obtenerVenta)
+
 auth.post("/sale", crearVenta)
+auth.post("/ventas", crearVenta)
+
+auth.put("/sale/:id", updateSale)
+auth.put("/ventas/actualizar-estado/:id", actualizarEstadoVenta) // CORREGIDO: ruta más específica
 
 // DEVOLUCIONES - RUTAS ACTUALIZADAS
 auth.post("/devoluciones", devolucionController.crearDevolucion)

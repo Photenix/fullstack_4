@@ -97,12 +97,12 @@ router.delete("/account", deleteAccount)
 router.get("/products", getProductsClient)
 
 // VENTAS
-router.get("/ventas", obtenerVentas)
-router.get("/ventas/cliente/:clienteId", obtenerVentasClienteId) // CORREGIDO: ahora viene de venta.controller.js
-router.get("/ventas/:id", obtenerVenta)
+// router.get("/ventas", obtenerVentas)
+// router.get("/ventas/cliente/:clienteId", obtenerVentasClienteId) // CORREGIDO: ahora viene de venta.controller.js
+// router.get("/ventas/:id", obtenerVenta)
 
-router.post("/ventas", crearVenta)
-router.put("/ventas/actualizar-estado/:id", actualizarEstadoVenta) // CORREGIDO: ruta más específica
+// router.post("/ventas", crearVenta)
+// router.put("/ventas/actualizar-estado/:id", actualizarEstadoVenta) // CORREGIDO: ruta más específica
 
 // DETALLE VENTA
 router.get("/detalleVenta/:ventaId", obtenerDetallesPorVenta)

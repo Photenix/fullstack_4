@@ -133,10 +133,10 @@ productSchema.post("findOneAndUpdate", async function(doc) {
         // Actualizar el campo totalQuantity en el documento
         doc.totalQuantity = totalQuantity;
         // console.log(doc);
-        console.log( details );
+        // console.log( details );
         
-        console.log(doc.totalQuantity);
-        await doc.save(); // Guardar el documento actualizado
+        // console.log(doc.totalQuantity);
+        await doc.save({ timestamps: false, new: true }); // Guardar el documento actualizado
     }
 });
 

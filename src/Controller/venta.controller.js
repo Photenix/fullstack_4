@@ -1,6 +1,7 @@
 // Controllers/ventaController.js
 const Venta = require("../Models/ventaModel")
 const DetalleVenta = require("../Models/detalleVentaModel")
+import Products from "../Models/Products.js";
 // CORREGIDO: Importar el modelo Product correctamente (ajusta la ruta según tu estructura)
 import Product from "../Models/Products.js"
 import { updateReturnProducts } from "../services/devolucionService.js";
@@ -231,6 +232,68 @@ const obtenerVentasClienteId = async (req, res) => {
   }
 }
 
+const updateSale = async (req, res) => {
+  try {
+    const { id } = req.params
+
+    req.body.employee = req.user._id
+
+    const updatedSale = await Venta.findOneAndUpdate(
+      { _id: id }, 
+      { $set: req.body },
+      // { new: true }
+      { new: false }
+    )
+    if (!updatedSale) {
+      return res.status(404).json({ success: false, message: "Venta no encontrada" })
+    }
+
+    // return old product to before add news
+    let listProduct = []
+    for (const product of updatedSale.productos) {
+
+      const updateP = await Products.findOneAndUpdate(
+        { "details._id": product.productoId },
+        { $inc: { "details.$.quantity": product.cantidad } },
+        { new: true }
+      )
+      
+      listProduct.push(updateP._id)
+    }
+    
+    // update total stock
+    // for (let i = 0; i < listProduct.length; i++) {
+    //   const element = listProduct[i];
+    //   await Products.findOneAndUpdate({ _id: element }, { $set: { __id: element } })
+    // }
+
+    const getSale = await Venta.findOne({ _id: id })
+
+    listProduct = []
+
+    // reduce products new
+    for (const product of getSale.productos) {
+      const updateP = await Products.findOneAndUpdate(
+        { "details._id": product.productoId },
+        { $inc: { "details.$.quantity": -product.cantidad } },
+        { new: true }
+      )
+      listProduct.push(updateP)
+    }
+
+    // update total stock
+    // for (let i = 0; i < listProduct.length; i++) {
+    //   const element = listProduct[i];
+    //   await Products.findOneAndUpdate({ _id: element }, { $set: { __id: element } })
+    // }
+
+    res.status(200).json({ success: true, message: "Venta actualizada", venta: getSale })
+  } catch (error) {
+    console.error("Error al actualizar la venta:", error)
+    res.status(500).json({ success: false, message: "Error al actualizar la venta", error: error.message })
+  }
+}
+
 module.exports = {
   crearVenta,
   obtenerVentas,
@@ -238,4 +301,5 @@ module.exports = {
   obtenerVenta,
   getSellByUser,
   obtenerVentasClienteId, // AGREGADO: exportar la función
+  updateSale,
 }

@@ -43,6 +43,7 @@ const hasPermission = async (req, res, next) => {
         const { permissions } = rol;
 
         if (instance === "purchase") instance = "shopping";
+        if( instance === "ventas" ) instance = "sale";
 
         if (permissions?.[instance]?.[method]) return next();
 
